@@ -1,0 +1,2067 @@
+function goToSection(sectionId) {
+  document.querySelectorAll('.section').forEach(section => {
+    section.classList.remove('active');
+  });
+  document.getElementById(sectionId).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ========== AUTONOMOUS PAGE ==========
+
+const fuelOptions = document.querySelectorAll('.fuel-option');
+const fuelNone = document.querySelector('.fuel-none');
+const fuelNoneCB = fuelNone.querySelector('input');
+
+fuelOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    if (fuelNoneCB.checked) return;
+    const cb = opt.querySelector('input');
+    cb.checked = !cb.checked;
+    opt.classList.toggle('highlight', cb.checked);
+  });
+});
+
+fuelNone.addEventListener('click', () => {
+  fuelNoneCB.checked = !fuelNoneCB.checked;
+
+  if (fuelNoneCB.checked) {
+    fuelOptions.forEach(opt => {
+      opt.querySelector('input').checked = false;
+      opt.classList.remove('highlight');
+      opt.classList.add('disabled');
+    });
+    fuelNone.classList.add('highlight');
+  } else {
+    fuelOptions.forEach(opt => opt.classList.remove('disabled'));
+    fuelNone.classList.remove('highlight');
+  }
+});
+
+const travelOptions = document.querySelectorAll('.travel-option');
+const travelNA = document.querySelector('.travel-na');
+const travelNACB = travelNA.querySelector('input');
+
+travelOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    if (travelNACB.checked) return;
+    const cb = opt.querySelector('input');
+    cb.checked = !cb.checked;
+    opt.classList.toggle('highlight', cb.checked);
+  });
+});
+
+travelNA.addEventListener('click', () => {
+  travelNACB.checked = !travelNACB.checked;
+
+  if (travelNACB.checked) {
+    travelOptions.forEach(opt => {
+      opt.querySelector('input').checked = false;
+      opt.classList.remove('highlight');
+      opt.classList.add('disabled');
+    });
+    travelNA.classList.add('highlight');
+  } else {
+    travelOptions.forEach(opt => opt.classList.remove('disabled'));
+    travelNA.classList.remove('highlight');
+  }
+});
+
+
+document.querySelectorAll('#autonomous .climb-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('#autonomous .climb-option').forEach(o => o.classList.remove('highlight'));
+    opt.querySelector('input').checked = true;
+    opt.classList.add('highlight');
+  });
+});
+
+// ========== SETUP PAGE ==========
+const allianceOptions = document.querySelectorAll('.alliance-options .option');
+
+allianceOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    if (opt.classList.contains('disabled')) {
+      return;
+    }
+
+    allianceOptions.forEach(o => {
+      o.classList.remove('red', 'blue', 'highlight');
+      o.querySelector('input').style.accentColor = '#1e90ff';
+    });
+
+    const radio = opt.querySelector('input');
+    radio.checked = true;
+
+    if (radio.id.startsWith('R')) {
+      opt.classList.add('red');
+      radio.style.accentColor = '#ff4c4c';
+    } else {
+      opt.classList.add('blue');
+      radio.style.accentColor = '#1e90ff';
+    }
+    opt.classList.add('highlight');
+
+    setStartPosImageForAlliance(radio.id);
+    updateStartPosOrder(radio.id);
+  });
+});
+const startOptions = document.querySelectorAll('.start-options .option');
+
+startOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    startOptions.forEach(o => {
+      o.classList.remove('highlight', 'red');
+      o.querySelector('input').checked = false;
+    });
+
+    opt.querySelector('input').checked = true;
+    opt.classList.add('highlight');
+
+    const field = opt.closest('.field');
+    if (field) {
+      field.style.border = '';
+      field.style.boxShadow = '';
+      field.style.padding = '';
+      field.style.borderRadius = '';
+    }
+  });
+});
+
+const startPosImage = document.getElementById('startPosImage');
+const fuelCollectionImage = document.getElementById('fuelCollectionImage');
+
+function setStartPosImageForAlliance(allianceId) {
+  if (!startPosImage) return;
+  if (!allianceId) {
+    allianceId = document.querySelector('#setup input[name="alliance"]:checked')?.id
+      || document.querySelector('#master-controls input[name="masterAlliance"]:checked')?.id
+      || '';
+  }
+
+  if (allianceId.includes('B')) {
+    startPosImage.src = 'images/blue_startingPos.png';
+  } else if (allianceId.includes('R')) {
+    startPosImage.src = 'images/red_startingPos.png';
+  }
+}
+
+function setFuelCollectionImageForAlliance(allianceId) {
+  if (!fuelCollectionImage) return;
+  if (!allianceId) {
+    allianceId = document.querySelector('#setup input[name="alliance"]:checked')?.id
+      || document.querySelector('#master-controls input[name="masterAlliance"]:checked')?.id
+      || '';
+  }
+
+  if (allianceId.includes('B')) {
+    fuelCollectionImage.src = 'images/blue_fuelCollection.png';
+  } else if (allianceId.includes('R')) {
+    fuelCollectionImage.src = 'images/red_fuelCollection.png';
+  }
+}
+
+startOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    startOptions.forEach(o => {
+      o.classList.remove('highlight', 'red');
+      o.querySelector('input').checked = false;
+    });
+
+    opt.querySelector('input').checked = true;
+    opt.classList.add('highlight');
+
+    const selectedAlliance = document.querySelector('#setup input[name="alliance"]:checked');
+    setStartPosImageForAlliance(selectedAlliance?.id);
+    updateStartPosOrder(selectedAlliance?.id);
+
+    const field = opt.closest('.field');
+    if (field) {
+      field.style.border = '';
+      field.style.boxShadow = '';
+      field.style.padding = '';
+      field.style.borderRadius = '';
+    }
+  });
+});
+
+allianceOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    const selectedStart = document.querySelector('#setup input[name="startPos"]:checked');
+    if (!selectedStart) return;
+
+    if (opt.querySelector('input').id.startsWith('B')) {
+      startPosImage.src = 'images/blue_startingPos.png';
+    } else if (opt.querySelector('input').id.startsWith('R')) {
+      startPosImage.src = 'images/red_startingPos.png';
+    }
+  });
+});
+
+
+const startOptionsContainer = document.querySelector('.start-options');
+
+const outpostOption = document.querySelector('#outpost').closest('.option');
+const centerOption = document.querySelector('#center').closest('.option');
+const depotOption = document.querySelector('#depot').closest('.option');
+
+function updateStartPosOrder(allianceId) {
+  if (!startOptionsContainer) return;
+
+  startOptionsContainer.innerHTML = '';
+
+  if (allianceId.includes('B')) {
+    startOptionsContainer.appendChild(depotOption);
+    startOptionsContainer.appendChild(centerOption);
+    startOptionsContainer.appendChild(outpostOption);
+  } else {
+    startOptionsContainer.appendChild(outpostOption);
+    startOptionsContainer.appendChild(centerOption);
+    startOptionsContainer.appendChild(depotOption);
+  }
+}
+
+
+
+
+
+// ========== TELEOP PAGE ==========
+const climbOptionsTeleop = document.querySelectorAll('#teleop .climb-option');
+const climbPosOptions = document.querySelectorAll('#teleop .climb-pos');
+const noneClimbOption = document.querySelector('#teleop .none-climb');
+const noneInput = noneClimbOption.querySelector('input');
+
+climbOptionsTeleop.forEach(opt => {
+  opt.addEventListener('click', () => {
+    if (opt.classList.contains('none-climb')) {
+      noneInput.checked = !noneInput.checked;
+
+      if (noneInput.checked) {
+        climbOptionsTeleop.forEach(o => {
+          if (!o.classList.contains('none-climb')) {
+            o.classList.add('disabled');
+            o.classList.remove('highlight');
+            o.querySelector('input').checked = false;
+          }
+        });
+        climbPosOptions.forEach(o => {
+          o.classList.add('disabled');
+          o.classList.remove('highlight');
+          o.querySelector('input').checked = false;
+        });
+        noneClimbOption.classList.add('highlight');
+        if (climbTimerInterval) {
+          stopClimbTimer();
+        }
+        climbFailed = false;
+        if (climbHoldButton) {
+          climbHoldButton.classList.remove('failed');
+          climbHoldButton.classList.remove('disabled');
+        }
+        if (climbAccumulated > 0) {
+          climbSavedBeforeNone = climbAccumulated;
+        }
+        climbAccumulated = 0;
+        if (climbDurationInput) climbDurationInput.value = '';
+        if (climbHoldButton) {
+          climbHoldButton.textContent = 'No Climb';
+          climbHoldButton.classList.add('disabled');
+        }
+      } else {
+        climbOptionsTeleop.forEach(o => o.classList.remove('disabled'));
+        climbPosOptions.forEach(o => o.classList.remove('disabled'));
+        noneClimbOption.classList.remove('highlight');
+        if (climbSavedBeforeNone > 0) {
+          climbAccumulated = climbSavedBeforeNone;
+          if (climbHoldButton) {
+            climbHoldButton.textContent = climbButtonText(climbAccumulated);
+            climbHoldButton.classList.add('filled');
+            climbHoldButton.classList.remove('disabled');
+          }
+          climbSavedBeforeNone = 0;
+          if (climbDurationInput) climbDurationInput.value = (climbAccumulated / 1000).toFixed(2);
+        } else {
+          if (climbHoldButton) {
+            climbHoldButton.textContent = 'Hold to time climb';
+            climbHoldButton.classList.remove('disabled');
+          }
+        }
+      }
+    } else if (!noneInput.checked) {
+      climbOptionsTeleop.forEach(o => o.classList.remove('highlight'));
+      opt.querySelector('input').checked = true;
+      opt.classList.add('highlight');
+      const labelText = (opt.textContent || '').trim().toLowerCase();
+      if (labelText.includes('failed')) {
+        climbFailed = true;
+        if (climbTimerInterval) stopClimbTimer();
+        if (climbHoldButton) {
+          climbHoldButton.classList.add('failed');
+          climbHoldButton.classList.add('disabled');
+        }
+      } else {
+        climbFailed = false;
+        if (climbHoldButton) {
+          climbHoldButton.classList.remove('failed');
+          climbHoldButton.classList.remove('disabled');
+        }
+      }
+      if (climbHoldButton) climbHoldButton.textContent = climbButtonText(climbAccumulated);
+    }
+  });
+});
+
+climbPosOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    if (!opt.classList.contains('disabled')) {
+      climbPosOptions.forEach(o => o.classList.remove('highlight'));
+      opt.querySelector('input').checked = true;
+      opt.classList.add('highlight');
+    }
+  });
+});
+
+const stuckBarOptions = document.querySelectorAll('#teleop .stuck-bar-option');
+
+function updateStuckBarState() {
+  const autonomousClimbRadios = document.querySelectorAll('#autonomous .climb-option input');
+  const level1Selected = Array.from(autonomousClimbRadios).some(rb => {
+    return rb.checked && rb.parentElement.textContent.includes('Level 1');
+  });
+
+  stuckBarOptions.forEach(opt => {
+    if (level1Selected) {
+      opt.classList.remove('disabled');
+      opt.querySelector('input').disabled = false;
+    } else {
+      opt.classList.add('disabled');
+      opt.querySelector('input').disabled = true;
+      opt.querySelector('input').checked = false;
+      opt.classList.remove('highlight');
+    }
+  });
+}
+
+stuckBarOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    if (!opt.classList.contains('disabled')) {
+      stuckBarOptions.forEach(o => o.classList.remove('highlight'));
+      opt.querySelector('input').checked = true;
+      opt.classList.add('highlight');
+    }
+  });
+});
+
+const originalGoToSection = window.goToSection;
+
+// ========== MASTER CONTROLS PASSWORD ==========
+
+const EMBEDDED_MASTER_PASSWORD = 'blueberry';
+
+async function verifyMasterPassword(input) {
+  if (!input) return { success: false, message: 'Please enter a password' };
+
+  const ok = String(input).trim() === EMBEDDED_MASTER_PASSWORD;
+  return { success: ok };
+}
+
+async function openMasterModal() {
+  const modal = document.getElementById('masterPasswordModal');
+  const input = document.getElementById('masterPasswordInput');
+  const submitBtn = document.getElementById('masterPasswordSubmit');
+  const cancelBtn = document.getElementById('masterPasswordCancel');
+  if (!modal || !input || !submitBtn || !cancelBtn) return Promise.resolve(false);
+
+  modal.setAttribute('aria-hidden', 'false');
+  input.value = '';
+  const errDiv = document.getElementById('masterPasswordError');
+  if (errDiv) errDiv.textContent = '';
+  input.classList.remove('invalid');
+
+  return new Promise(resolve => {
+    let cleaned = false;
+
+    function cleanup(result) {
+      if (cleaned) return;
+      cleaned = true;
+      submitBtn.removeEventListener('click', onSubmit);
+      cancelBtn.removeEventListener('click', onCancel);
+      input.removeEventListener('keydown', onKeydown);
+      modal.setAttribute('aria-hidden', 'true');
+      resolve(result);
+    }
+
+    function setError(msg) {
+      if (errDiv) errDiv.textContent = msg;
+      input.classList.add('invalid');
+    }
+
+    async function onSubmit(e) {
+      e.preventDefault();
+      const val = input.value || '';
+      const result = await verifyMasterPassword(val);
+
+      if (result.success) {
+        cleanup(true);
+      } else {
+        setError('Incorrect password');
+        input.select();
+        input.focus();
+      }
+    }
+
+    function onCancel() {
+      cleanup(false);
+    }
+
+    function onKeydown(e) {
+      if (e.key === 'Enter') onSubmit(e);
+      if (e.key === 'Escape') onCancel();
+    }
+
+    submitBtn.addEventListener('click', onSubmit);
+    cancelBtn.addEventListener('click', onCancel);
+    input.addEventListener('keydown', onKeydown);
+  });
+}
+
+const masterMenuBtn = document.getElementById('masterMenuBtn');
+if (masterMenuBtn) {
+  masterMenuBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const ok = await openMasterModal();
+    if (!ok) return;
+    originalGoToSection('master-controls');
+  });
+}
+
+
+window.goToSection = function (sectionId) {
+  originalGoToSection(sectionId);
+  if (sectionId === 'teleop') {
+    updateStuckBarState();
+  }
+};
+
+
+
+const climbHoldButton = document.getElementById('climbHoldButton');
+const climbHoldDisplay = document.getElementById('climbHoldDisplay');
+const climbDurationInput = document.getElementById('climbDuration');
+const climbResetButton = document.getElementById("climbResetButton");
+
+let climbTimerInterval = null;
+let climbStart = null;
+let climbAccumulated = 0;
+let climbFailed = false;
+let climbSavedBeforeNone = 0;
+
+
+if (climbResetButton) {
+  climbResetButton.addEventListener("click", () => {
+    if (climbTimerInterval) {
+      clearInterval(climbTimerInterval);
+      climbTimerInterval = null;
+    }
+
+    climbStart = null;
+    climbAccumulated = 0;
+    climbSavedBeforeNone = 0;
+    climbFailed = false;
+
+    climbHoldDisplay.textContent = "0.00s";
+    climbDurationInput.value = "";
+    climbHoldButton.textContent = "Hold to time climb";
+    climbHoldButton.classList.remove(
+      "holding",
+      "filled",
+      "failed",
+      "disabled"
+    );
+  });
+}
+
+
+function climbButtonText(ms) {
+  const t = formatElapsed(ms);
+  return climbFailed ? `Failed climb — ${t}` : t;
+}
+
+function formatElapsed(ms) {
+  return (ms / 1000).toFixed(2) + 's';
+}
+
+function startClimbTimer(e) {
+  if (e && typeof e.preventDefault === 'function') e.preventDefault();
+  if (climbFailed || (climbHoldButton && climbHoldButton.classList.contains('disabled'))) return;
+  if (climbTimerInterval) return;
+  climbStart = Date.now();
+  climbHoldButton.classList.remove('filled');
+  climbHoldButton.classList.add('holding');
+  climbHoldButton.textContent = climbButtonText(climbAccumulated);
+  climbTimerInterval = setInterval(() => {
+    const current = climbAccumulated + (Date.now() - climbStart);
+    climbHoldButton.textContent = climbButtonText(current);
+  }, 100);
+}
+
+function stopClimbTimer(e) {
+  if (!climbTimerInterval) return;
+  clearInterval(climbTimerInterval);
+  const elapsed = Date.now() - climbStart;
+  climbAccumulated += elapsed;
+  climbTimerInterval = null;
+  climbStart = null;
+  climbHoldButton.classList.remove('holding');
+  climbHoldButton.classList.add('filled');
+  climbHoldButton.textContent = climbButtonText(climbAccumulated);
+  climbHoldDisplay.textContent = '';
+  climbDurationInput.value = (climbAccumulated / 1000).toFixed(2);
+}
+
+if (climbHoldButton) {
+  climbHoldButton.addEventListener('pointerdown', startClimbTimer);
+  climbHoldButton.addEventListener('pointercancel', stopClimbTimer);
+  window.addEventListener('pointerup', stopClimbTimer);
+  climbHoldButton.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+// ========== ENDCARDS PAGE ==========
+document.querySelectorAll('#endcards .radio-select-column').forEach(group => {
+  const options = group.querySelectorAll('.option');
+  options.forEach(opt => {
+    opt.addEventListener('click', () => {
+      options.forEach(o => o.classList.remove('highlight'));
+      opt.querySelector('input').checked = true;
+      opt.classList.add('highlight');
+    });
+  });
+});
+
+const commentsBox = document.getElementById('comments');
+const commentsCounter = document.getElementById('comments-counter');
+
+commentsBox.addEventListener('input', () => {
+  const remaining = 500 - commentsBox.value.length;
+  commentsCounter.innerText = `${remaining} characters remaining`;
+
+  if (remaining === 0) {
+    commentsCounter.style.color = '#ff4c4c';
+  } else {
+    commentsCounter.style.color = '#aaa';
+  }
+});
+
+// ========== MASTER CONTROLS PAGE ==========
+const masterAllianceOptions = document.querySelectorAll(
+  '#master-controls .alliance-options .option'
+);
+
+masterAllianceOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    masterAllianceOptions.forEach(o => {
+      o.classList.remove('red', 'blue');
+      o.querySelector('input').style.accentColor = '#1e90ff';
+    });
+
+    const radio = opt.querySelector('input');
+    radio.checked = true;
+
+    if (radio.id.includes('R')) {
+      opt.classList.add('red');
+      radio.style.accentColor = '#ff4c4c';
+    } else {
+      opt.classList.add('blue');
+      radio.style.accentColor = '#1e90ff';
+    }
+
+    localStorage.setItem('selectedAlliance', radio.id);
+    lockSetupAlliance(radio.id);
+
+    setStartPosImageForAlliance(radio.id);
+    updateStartPosOrder(radio.id);
+
+  });
+});
+
+function loadSavedAlliance() {
+  const savedAlliance = localStorage.getItem('selectedAlliance');
+  if (savedAlliance) {
+    const savedOption = document.querySelector(`#${savedAlliance}`);
+    if (savedOption) {
+      const parentOpt = savedOption.closest('.option');
+      parentOpt.click();
+    }
+  }
+}
+
+loadSavedAlliance();
+
+function lockSetupAlliance(masterId) {
+  const setupOptions = document.querySelectorAll('#setup .alliance-options .option');
+  const masterMap = {
+    'MC_R1': 'R1option',
+    'MC_B1': 'B1option',
+    'MC_R2': 'R2option',
+    'MC_B2': 'B2option',
+    'MC_R3': 'R3option',
+    'MC_B3': 'B3option'
+  };
+
+  const setupOptionId = masterMap[masterId];
+
+  setupOptions.forEach(opt => {
+    if (opt.id === setupOptionId) {
+      const radio = opt.querySelector('input');
+      radio.checked = true;
+      opt.classList.add('highlight');
+
+      opt.classList.remove('red', 'blue');
+      if (radio.id.startsWith('R')) {
+        opt.classList.add('red');
+        radio.style.accentColor = '#ff4c4c';
+      } else {
+        opt.classList.add('blue');
+        radio.style.accentColor = '#1e90ff';
+      }
+      setStartPosImageForAlliance(masterId);
+      updateStartPosOrder(masterId);
+    }
+
+    opt.classList.add('disabled');
+  });
+}
+
+function resetAlliance() {
+  if (!confirm("Are you sure you want to reset the alliance position?")) {
+    return;
+  }
+
+  localStorage.removeItem('selectedAlliance');
+
+  masterAllianceOptions.forEach(opt => {
+    opt.classList.remove('red', 'blue', 'highlight');
+    opt.querySelector('input').checked = false;
+    opt.querySelector('input').style.accentColor = '#1e90ff';
+  });
+
+  const setupOptions = document.querySelectorAll('#setup .alliance-options .option');
+  setupOptions.forEach(opt => {
+    opt.classList.remove('disabled', 'highlight', 'red', 'blue');
+    opt.querySelector('input').checked = false;
+    opt.querySelector('input').style.accentColor = '#1e90ff';
+  });
+  if (startPosImage) startPosImage.src = 'images/red_startingPos.png';
+  clearSetupTeamFields();
+}
+
+
+
+let matchSchedule = [];
+
+function handleMatchScheduleUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
+    updateMatchCSVStatus("Invalid file type. Please upload a CSV.", false);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+
+    const lines = text.trim().split("\n");
+    const headers = lines[0].split(",").map(h => h.trim());
+    const requiredHeaders = ['Match Number', 'Red 1', 'Red 2', 'Red 3', 'Blue 1', 'Blue 2', 'Blue 3'];
+    const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+
+    if (missingHeaders.length > 0) {
+      updateMatchCSVStatus(`Missing headers: ${missingHeaders.join(", ")}`, false);
+      matchSchedule = [];
+      document.getElementById('teamNumber').disabled = false;
+      document.getElementById('teamNumber').placeholder = "Enter team #";
+      return;
+    }
+
+    clearSetupTeamFields();
+
+    matchSchedule = lines.slice(1).map(line => {
+      const values = line.split(",").map(v => v.trim());
+      const rowObj = {};
+      headers.forEach((header, i) => {
+        rowObj[header] = values[i];
+      });
+      return rowObj;
+    });
+
+    localStorage.setItem('matchScheduleCSV', text);
+    localStorage.setItem('matchScheduleFileName', file.name);
+
+    updateMatchCSVStatus(file.name, true);
+
+    const teamInput = document.getElementById('teamNumber');
+    teamInput.disabled = true;
+    teamInput.placeholder = "Auto-filled from match schedule";
+  };
+
+  reader.readAsText(file);
+}
+
+function updateMatchCSVStatus(message, success) {
+  const statusDiv = document.getElementById('csvUploadStatus');
+
+  if (success) {
+    statusDiv.style.background = "#002244";
+    statusDiv.style.border = "2px solid #1e90ff";
+    statusDiv.style.color = "#1e90ff";
+    statusDiv.innerHTML = `<p style="text-align:center; font-size:1rem;">${message}</p>`;
+    statusDiv.classList.add('uploaded');
+  } else {
+    statusDiv.style.background = "#440000";
+    statusDiv.style.border = "2px solid #ff4c4c";
+    statusDiv.style.color = "#ff4c4c";
+    statusDiv.innerHTML = `<p style="text-align:center; font-size:1rem;">${message}</p>`;
+    statusDiv.classList.remove('uploaded');
+  }
+}
+
+
+async function saveCSVToLocalFile(csvText, defaultFileName = 'match_schedule.csv') {
+  try {
+    const handle = await window.showSaveFilePicker({
+      suggestedName: defaultFileName,
+      types: [{
+        description: 'CSV Files',
+        accept: { 'text/csv': ['.csv'] }
+      }]
+    });
+
+    const writable = await handle.createWritable();
+    await writable.write(csvText);
+    await writable.close();
+
+    console.log("CSV saved to local storage:", handle.name);
+  } catch (err) {
+    console.error("CSV not saved:", err);
+  }
+}
+
+function parseCSV(csvText) {
+  const lines = csvText.trim().split("\n");
+  const headers = lines[0].split(",").map(h => h.trim());
+
+  const requiredHeaders = ['Match Number', 'Red 1', 'Red 2', 'Red 3', 'Blue 1', 'Blue 2', 'Blue 3'];
+
+  const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+  if (missingHeaders.length > 0) {
+    const statusDiv = document.getElementById('csvUploadStatus');
+    statusDiv.innerHTML = `<p style="color:#ff4c4c;">Error: Missing headers: ${missingHeaders.join(', ')}</p>`;
+    statusDiv.classList.remove('uploaded');
+    matchSchedule = [];
+    return;
+  }
+
+  matchSchedule = lines.slice(1).map(line => {
+    const values = line.split(",").map(v => v.trim());
+    const rowObj = {};
+    headers.forEach((header, i) => {
+      rowObj[header] = values[i];
+    });
+    return rowObj;
+  });
+
+  console.log("Parsed Match Schedule:", matchSchedule);
+}
+
+function autofillTeamNumber() {
+  const matchNumber = document.getElementById("matchNumber").value.trim();
+  const teamNumberInput = document.getElementById('teamNumber');
+  const teamNameInput = document.getElementById('teamName');
+
+  if (!matchNumber) {
+    teamNumberInput.value = '';
+    teamNameInput.value = '';
+    return;
+  }
+
+  const selectedAllianceRadio = document.querySelector('#setup .alliance-options .option input:checked');
+  if (!selectedAllianceRadio) return;
+
+  const allianceMap = {
+    'R1': 'Red 1',
+    'R2': 'Red 2',
+    'R3': 'Red 3',
+    'B1': 'Blue 1',
+    'B2': 'Blue 2',
+    'B3': 'Blue 3'
+  };
+
+  const allianceId = selectedAllianceRadio.id;
+  const allianceHeader = allianceMap[allianceId];
+
+  const matchRow = matchSchedule.find(row => row['Match Number'] === matchNumber);
+  if (matchRow && allianceHeader) {
+    teamNumberInput.value = matchRow[allianceHeader];
+
+    teamNumberInput.style.borderColor = '';
+    teamNumberInput.style.boxShadow = '';
+    teamNumberInput.style.outline = '2px solid #2a2d31';
+
+    autofillTeamName();
+  } else {
+    teamNumberInput.value = '';
+    teamNameInput.value = '';
+  }
+}
+document.getElementById('matchNumber').addEventListener('input', autofillTeamNumber);
+
+
+allianceOptions.forEach(opt => {
+  opt.addEventListener('click', autofillTeamNumber);
+});
+
+function autofillTeamName() {
+  const teamNumberInput = document.getElementById('teamNumber');
+  const teamNameInput = document.getElementById('teamName');
+
+  const teamNumber = teamNumberInput.value.trim();
+  if (!teamNumber || teamList.length === 0) {
+    teamNameInput.value = '';
+    return;
+  }
+
+  const match = teamList.find(
+    row => row['Team Number'] === teamNumber
+  );
+
+  if (match) {
+    teamNameInput.value = match['Team Name'] || '';
+  } else {
+    teamNameInput.value = '';
+  }
+}
+
+document.getElementById('teamNumber').addEventListener('input', autofillTeamName);
+function handleTeamCSVUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
+    updateTeamCSVStatus("Invalid file type. Please upload a CSV.", false);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    const lines = text.trim().split("\n");
+    const headers = lines[0].split(",").map(h => h.trim());
+    const requiredHeaders = ['Team Number', 'Team Name'];
+    const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+
+    if (missingHeaders.length > 0) {
+      updateTeamCSVStatus(`Missing headers: ${missingHeaders.join(", ")}`, false);
+      teamList = [];
+      document.getElementById('teamName').value = '';
+      document.getElementById('teamName').disabled = true;
+      return;
+    }
+
+    clearSetupTeamFields();
+
+    teamList = lines.slice(1).map(line => {
+      const values = line.split(",").map(v => v.trim());
+      const rowObj = {};
+      headers.forEach((h, i) => rowObj[h] = values[i]);
+      return rowObj;
+    });
+
+    localStorage.setItem('teamCSV', text);
+    localStorage.setItem('teamCSVFileName', file.name);
+
+    updateTeamCSVStatus(file.name, true);
+
+    const teamNameInput = document.getElementById('teamName');
+    teamNameInput.disabled = false;
+    teamNameInput.placeholder = "Auto-filled by CSV";
+
+    autofillTeamName();
+  };
+
+  reader.readAsText(file);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedMatchCSV = localStorage.getItem('matchScheduleCSV');
+  const savedMatchFileName = localStorage.getItem('matchScheduleFileName');
+
+  if (savedMatchCSV) {
+    parseCSV(savedMatchCSV);
+    updateMatchCSVStatus(savedMatchFileName, true);
+    document.getElementById('teamNumber').disabled = true;
+    document.getElementById('teamNumber').placeholder = "Auto-filled from match schedule";
+  }
+
+  const savedTeamCSV = localStorage.getItem('teamCSV');
+  const savedTeamFileName = localStorage.getItem('teamCSVFileName');
+
+  const teamNameInput = document.getElementById('teamName');
+
+  if (savedTeamCSV) {
+    parseTeamCSV(savedTeamCSV);
+    updateTeamCSVStatus(savedTeamFileName, true);
+    teamNameInput.disabled = false;
+    teamNameInput.placeholder = "Auto-filled from team CSV";
+  } else {
+    teamNameInput.disabled = true;
+    teamNameInput.placeholder = "Upload team CSV to enter names";
+  }
+});
+
+function deleteMatchSchedule() {
+  if (!localStorage.getItem('matchScheduleCSV')) {
+    alert("No CSV uploaded.");
+    return;
+  }
+  if (confirm("Are you sure you want to delete the uploaded match schedule CSV?")) {
+    localStorage.removeItem('matchScheduleCSV');
+    localStorage.removeItem('matchScheduleFileName');
+    matchSchedule = [];
+
+    const teamInput = document.getElementById('teamNumber');
+    teamInput.value = '';
+    teamInput.disabled = false;
+    teamInput.placeholder = "Enter team #";
+
+    const statusDiv = document.getElementById('csvUploadStatus');
+    statusDiv.style.background = "#1a1c1f";
+    statusDiv.style.border = "2px solid #2a2d31";
+    statusDiv.style.color = "#ffffff";
+    statusDiv.innerHTML = `<p style="text-align: center; font-size: 1rem; color: #ccc;">No match schedule uploaded.</p>`;
+    statusDiv.classList.remove('uploaded');
+
+    alert("CSV deleted successfully!");
+    clearSetupTeamFields();
+  }
+}
+
+
+let teamList = [];
+
+function updateTeamCSVStatus(message, success) {
+  const statusDiv = document.getElementById('teamCSVUploadStatus');
+
+  if (success) {
+    statusDiv.style.background = "#002244";
+    statusDiv.style.border = "2px solid #1e90ff";
+    statusDiv.style.color = "#1e90ff";
+    statusDiv.innerHTML = `<p style="text-align:center; font-size:1rem;">${message}</p>`;
+    statusDiv.classList.add('uploaded');
+  } else {
+    statusDiv.style.background = "#440000";
+    statusDiv.style.border = "2px solid #ff4c4c";
+    statusDiv.style.color = "#ff4c4c";
+    statusDiv.innerHTML = `<p style="text-align:center; font-size:1rem;">${message}</p>`;
+    statusDiv.classList.remove('uploaded');
+  }
+}
+
+function parseTeamCSV(csvText) {
+  const lines = csvText.trim().split("\n");
+  const headers = lines[0].split(",").map(h => h.trim());
+
+  const requiredHeaders = ['Team Number', 'Team Name'];
+
+  const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+  if (missingHeaders.length > 0) {
+    const statusDiv = document.getElementById('teamCSVUploadStatus');
+    statusDiv.innerHTML = `<p style="color:#ff4c4c;">Error: Missing headers: ${missingHeaders.join(', ')}</p>`;
+    statusDiv.classList.remove('uploaded');
+    teamList = [];
+    return;
+  }
+
+  teamList = lines.slice(1).map(line => {
+    const values = line.split(",").map(v => v.trim());
+    const row = {};
+    headers.forEach((h, i) => row[h] = values[i]);
+    return row;
+  });
+
+  console.log("Parsed Team List:", teamList);
+}
+
+function deleteTeamCSV() {
+  if (!localStorage.getItem('teamCSV')) {
+    alert("No team list uploaded.");
+    return;
+  }
+
+  if (confirm("Are you sure you want to delete the team list CSV?")) {
+    localStorage.removeItem('teamCSV');
+    localStorage.removeItem('teamCSVFileName');
+    teamList = [];
+
+    const statusDiv = document.getElementById('teamCSVUploadStatus');
+    statusDiv.style.background = "#1a1c1f";
+    statusDiv.style.border = "2px solid #2a2d31";
+    statusDiv.style.color = "#ffffff";
+    statusDiv.innerHTML = `<p style="text-align:center; font-size:1rem; color:#ccc;">No team list uploaded.</p>`;
+    statusDiv.classList.remove('uploaded');
+
+    alert("Team list deleted.");
+    clearSetupTeamFields();
+
+    const teamNameInput = document.getElementById('teamName');
+    teamNameInput.disabled = true;
+    teamNameInput.placeholder = "Upload team CSV to enter names";
+    teamNameInput.value = '';
+  }
+}
+
+const savedTeamCSV = localStorage.getItem('teamCSV');
+const savedTeamFile = localStorage.getItem('teamCSVFileName');
+
+if (savedTeamCSV) {
+  parseTeamCSV(savedTeamCSV);
+  if (savedTeamFile) updateTeamCSVStatus(savedTeamFile);
+}
+
+
+function clearSetupTeamFields() {
+  document.getElementById('matchNumber').value = '';
+  document.getElementById('teamNumber').value = '';
+  document.getElementById('teamName').value = '';
+}
+
+const teamNameInput = document.getElementById('teamName');
+
+if (!localStorage.getItem('teamCSV')) {
+  teamNameInput.disabled = true;
+  teamNameInput.placeholder = "Upload team CSV to enter names";
+} else {
+  teamNameInput.disabled = false;
+  teamNameInput.placeholder = "";
+}
+
+
+// ========== RESET FORM FOR NEW ENTRY ==========
+
+function resetFormForNewEntry() {
+  const setupOptions = document.querySelectorAll('#setup .alliance-options .option');
+  const allianceLocked = Array.from(setupOptions).some(opt => opt.classList.contains('disabled'));
+
+  document.querySelectorAll('#setup input[type="text"], #setup input[type="number"]').forEach(input => {
+    if (input.id === 'matchNumber' || input.id === 'teamNumber') {
+      input.value = '';
+    } else {
+      input.value = '';
+    }
+  });
+
+  document.querySelectorAll('#endcards input[name="shootingAccuracy"]').forEach(rb => {
+    rb.checked = false;
+  });
+
+  document.querySelectorAll('#setup .start-options .option').forEach(opt => {
+    opt.classList.remove('highlight');
+    opt.querySelector('input').checked = false;
+  });
+
+  document.querySelectorAll('#autonomous input[type="checkbox"]').forEach(cb => cb.checked = false);
+  document.querySelectorAll('#autonomous .option').forEach(opt => opt.classList.remove('highlight', 'disabled'));
+
+  document.querySelectorAll('#autonomous .climb-option').forEach(opt => {
+    opt.classList.remove('highlight');
+    opt.querySelector('input').checked = false;
+  });
+
+  document.querySelectorAll('#teleop .climb-option, #teleop .climb-pos').forEach(opt => {
+    opt.classList.remove('highlight', 'disabled');
+    opt.querySelector('input').checked = false;
+  });
+
+  document.querySelectorAll('#teleop .stuck-bar-option').forEach(opt => {
+    opt.classList.remove('highlight');
+    opt.querySelector('input').checked = false;
+  });
+
+  try {
+    if (climbHoldButton) {
+      climbHoldButton.textContent = 'Hold to time climb';
+      climbHoldButton.classList.remove('holding', 'filled', 'failed', 'disabled');
+    }
+    climbAccumulated = 0;
+    climbSavedBeforeNone = 0;
+    climbFailed = false;
+  } catch (err) {
+
+  }
+
+  document.querySelectorAll('#endcards input[type="radio"]').forEach(rb => {
+    rb.checked = false;
+  });
+
+  document.querySelectorAll('#endcards .option').forEach(opt => {
+    opt.classList.remove('highlight');
+  });
+
+  document.getElementById('comments').value = '';
+  document.getElementById('comments-counter').innerText = '500 characters remaining';
+  document.getElementById('comments-counter').style.color = '#aaa';
+
+  const teamInput = document.getElementById('teamNumber');
+  if (!teamInput.disabled) teamInput.value = '';
+
+  if (!allianceLocked) {
+    setupOptions.forEach(opt => {
+      opt.classList.remove('highlight', 'red', 'blue');
+      opt.querySelector('input').checked = false;
+      opt.querySelector('input').style.accentColor = '#1e90ff';
+    });
+  }
+}
+const setupOptions = document.querySelectorAll('#setup .alliance-options .option');
+const allianceLocked = Array.from(setupOptions).some(opt => opt.classList.contains('disabled'));
+
+document.querySelectorAll('#setup input[type="text"], #setup input[type="number"]').forEach(input => {
+  if (input.id === 'matchNumber' || input.id === 'teamNumber') {
+    input.value = '';
+  } else {
+    input.value = '';
+  }
+});
+
+document.querySelectorAll('#setup .start-options .option').forEach(opt => {
+  opt.classList.remove('highlight');
+  opt.querySelector('input').checked = false;
+});
+
+document.querySelectorAll('#autonomous input[type="checkbox"]').forEach(cb => cb.checked = false);
+document.querySelectorAll('#autonomous .option').forEach(opt => opt.classList.remove('highlight', 'disabled'));
+
+document.querySelectorAll('#autonomous .climb-option').forEach(opt => {
+  opt.classList.remove('highlight');
+  opt.querySelector('input').checked = false;
+});
+
+document.querySelectorAll('#teleop .climb-option, #teleop .climb-pos').forEach(opt => {
+  opt.classList.remove('highlight', 'disabled');
+  opt.querySelector('input').checked = false;
+});
+
+  document.querySelectorAll('#teleop .field').forEach(field => {
+    field.style.border = '';
+    field.style.boxShadow = '';
+    field.style.padding = '';
+    field.style.borderRadius = '';
+  });
+
+try {
+  if (climbHoldButton) {
+    climbHoldButton.textContent = 'Hold to time climb';
+    climbHoldButton.classList.remove('holding', 'filled');
+  }
+  climbAccumulated = 0;
+  climbSavedBeforeNone = 0;
+} catch (err) {
+}
+document.getElementById('comments').value = '';
+
+const teamInput = document.getElementById('teamNumber');
+if (!teamInput.disabled) teamInput.value = '';
+
+if (!allianceLocked) {
+  setupOptions.forEach(opt => {
+    opt.classList.remove('highlight', 'red', 'blue');
+    opt.querySelector('input').checked = false;
+    opt.querySelector('input').style.accentColor = '#1e90ff';
+  });
+}
+
+
+// ========== NEXT PAGE VALIDATION ==========
+
+function validateSetupForm() {
+  const requiredFields = [
+    { id: 'matchNumber', label: 'Match Number', container: null },
+    { id: 'scouterName', label: 'Scouter Name', container: null },
+    { id: 'teamNumber', label: 'Team Number', container: null },
+    { id: 'alliance', label: 'Alliance Position', container: '.alliance-options', isRadio: true },
+    { id: 'startPos', label: 'Starting Position', container: '.start-options', isRadio: true }
+  ];
+
+  let isValid = true;
+  const invalidFields = [];
+
+  requiredFields.forEach(field => {
+    if (field.isRadio) {
+      const selected = document.querySelector(`#setup input[name="${field.id}"]:checked`);
+      const container = document.querySelector(`#setup ${field.container}`);
+      const parent = container ? container.parentElement : null;
+
+      if (!selected) {
+        invalidFields.push(field);
+        if (parent) {
+          parent.style.borderRadius = '12px';
+          parent.style.border = '3px solid #ff4c4c';
+          parent.style.padding = '12px';
+          parent.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+        }
+        isValid = false;
+      } else if (parent) {
+        parent.style.border = '';
+        parent.style.boxShadow = '';
+        parent.style.padding = '';
+        parent.style.borderRadius = '';
+      }
+
+      const radios = document.querySelectorAll(`#setup ${field.container} input`);
+      radios.forEach(radio => {
+        radio.addEventListener('click', () => {
+          if (parent) {
+            parent.style.border = '';
+            parent.style.boxShadow = '';
+            parent.style.padding = '';
+            parent.style.borderRadius = '';
+          }
+        });
+      });
+
+    } else {
+      const input = document.getElementById(field.id);
+      if (!input.value.trim()) {
+        invalidFields.push(field);
+        input.style.borderColor = '#ff4c4c';
+        input.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+        input.style.outline = '2px solid #ff4c4c';
+        isValid = false;
+      } else {
+        input.style.borderColor = '';
+        input.style.boxShadow = '';
+        input.style.outline = '2px solid #2a2d31';
+      }
+
+      input.addEventListener('input', () => {
+        input.style.borderColor = '';
+        input.style.boxShadow = '';
+        input.style.outline = '2px solid #2a2d31';
+      });
+    }
+  });
+
+  return isValid;
+}
+
+
+function clearValidationHighlightForField(fieldNameOrElement) {
+  let field = fieldNameOrElement;
+
+  if (typeof fieldNameOrElement === 'string') {
+    field = document.querySelector(`#setup input[name="${fieldNameOrElement}"]`);
+  }
+
+  if (!field) return;
+
+  if (field.type === 'radio') {
+    const selected = document.querySelector(`#setup input[name="${field.name}"]:checked`);
+    if (selected) {
+      let container = field.closest('.alliance-options, .start-options');
+      if (container) {
+        const parentField = container.closest('.field');
+        if (parentField) {
+          parentField.style.border = '';
+          parentField.style.boxShadow = '';
+          parentField.style.padding = '';
+          parentField.style.borderRadius = '';
+        }
+      }
+    }
+  } else {
+    if (field.value.trim() !== '') {
+      field.style.borderColor = '';
+      field.style.boxShadow = '';
+      field.style.outline = '2px solid #2a2d31';
+    }
+  }
+}
+
+document.getElementById('matchNumber').addEventListener('input', e => clearValidationHighlightForField(e.target));
+document.getElementById('scouterName').addEventListener('input', e => clearValidationHighlightForField(e.target));
+document.getElementById('teamNumber').addEventListener('input', e => clearValidationHighlightForField(e.target));
+
+document.querySelectorAll('#setup input[type="radio"][name="alliance"]').forEach(radio => {
+  radio.addEventListener('change', e => clearValidationHighlightForField(e.target));
+});
+
+document.querySelectorAll('#setup input[type="radio"][name="startPos"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const field = radio.closest('.field');
+    if (field) {
+      field.style.border = '';
+      field.style.boxShadow = '';
+      field.style.padding = '';
+      field.style.borderRadius = '';
+    }
+  });
+});
+
+// ========== FORM VALIDATION ==========
+function clearTeleopValidationHighlights() {
+  const stuckBarField = document.querySelector('#teleop .field:nth-of-type(1)');
+  const stuckBarRadios = document.querySelectorAll('#teleop input[name="stuckBar"]');
+  const stuckBarSelected = Array.from(stuckBarRadios).some(rb => rb.checked);
+  
+  if (stuckBarSelected && stuckBarField) {
+    stuckBarField.style.border = '';
+    stuckBarField.style.boxShadow = '';
+    stuckBarField.style.padding = '';
+    stuckBarField.style.borderRadius = '';
+  }
+
+  const climbField = document.querySelector('#teleop .field:nth-of-type(4)');
+  const climbRadios = document.querySelectorAll('#teleop input[name="climb-teleop"]');
+  const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
+  
+  if (climbSelected && climbField) {
+    climbField.style.border = '';
+    climbField.style.boxShadow = '';
+    climbField.style.padding = '';
+    climbField.style.borderRadius = '';
+  }
+
+  const climbPosField = document.querySelector('#teleop .field:nth-of-type(5)');
+  const climbPosRadios = document.querySelectorAll('#teleop input[name="climbPos"]');
+  const climbPosSelected = Array.from(climbPosRadios).some(rb => rb.checked);
+  const climbTeleopSelected = document.querySelector('#teleop input[name="climb-teleop"]:checked');
+  const climbTeleopLabel = climbTeleopSelected?.nextElementSibling?.textContent?.trim() || '';
+  
+  if ((climbTeleopLabel === 'None' || climbPosSelected) && climbPosField) {
+    climbPosField.style.border = '';
+    climbPosField.style.boxShadow = '';
+    climbPosField.style.padding = '';
+    climbPosField.style.borderRadius = '';
+  }
+}
+function clearTeleopValidationHighlights() {
+  const stuckBarField = document.querySelector('#teleop .field:nth-of-type(1)');
+  const stuckBarRadios = document.querySelectorAll('#teleop input[name="stuckBar"]');
+  const stuckBarSelected = Array.from(stuckBarRadios).some(rb => rb.checked);
+  
+  if (stuckBarSelected && stuckBarField) {
+    stuckBarField.style.border = '';
+    stuckBarField.style.boxShadow = '';
+    stuckBarField.style.padding = '';
+    stuckBarField.style.borderRadius = '';
+  }
+
+  const climbField = document.querySelector('#teleop .field:nth-of-type(4)');
+  const climbRadios = document.querySelectorAll('#teleop input[name="climb-teleop"]');
+  const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
+  
+  if (climbSelected && climbField) {
+    climbField.style.border = '';
+    climbField.style.boxShadow = '';
+    climbField.style.padding = '';
+    climbField.style.borderRadius = '';
+  }
+
+  const climbPosField = document.querySelector('#teleop .field:nth-of-type(5)');
+  const climbPosRadios = document.querySelectorAll('#teleop input[name="climbPos"]');
+  const climbPosSelected = Array.from(climbPosRadios).some(rb => rb.checked);
+  const climbTeleopSelected = document.querySelector('#teleop input[name="climb-teleop"]:checked');
+  const climbTeleopLabel = climbTeleopSelected?.nextElementSibling?.textContent?.trim() || '';
+  
+  if ((climbTeleopLabel === 'None' || climbPosSelected) && climbPosField) {
+    climbPosField.style.border = '';
+    climbPosField.style.boxShadow = '';
+    climbPosField.style.padding = '';
+    climbPosField.style.borderRadius = '';
+  }
+}
+document.querySelectorAll('#teleop .stuck-bar-option').forEach(opt => {
+  opt.addEventListener('click', clearTeleopValidationHighlights);
+});
+
+document.querySelectorAll('#teleop .climb-option').forEach(opt => {
+  opt.addEventListener('click', clearTeleopValidationHighlights);
+});
+
+document.querySelectorAll('#teleop .climb-pos').forEach(opt => {
+  opt.addEventListener('click', clearTeleopValidationHighlights);
+});
+function validateTeleopForm() {
+  let isValid = true;
+
+  const stuckBarField = document.querySelector('#teleop .field:nth-of-type(1)');
+  const stuckBarRadios = document.querySelectorAll('#teleop input[name="stuckBar"]');
+  const stuckBarEnabled = Array.from(stuckBarRadios).some(rb => !rb.disabled);
+  const stuckBarSelected = Array.from(stuckBarRadios).some(rb => rb.checked);
+
+  if (stuckBarEnabled && !stuckBarSelected) {
+    isValid = false;
+    if (stuckBarField) {
+      stuckBarField.style.borderRadius = '12px';
+      stuckBarField.style.border = '3px solid #ff4c4c';
+      stuckBarField.style.padding = '12px';
+      stuckBarField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (stuckBarField) {
+    stuckBarField.style.border = '';
+    stuckBarField.style.boxShadow = '';
+    stuckBarField.style.padding = '';
+    stuckBarField.style.borderRadius = '';
+  }
+
+  const climbRadios = document.querySelectorAll('#teleop input[name="climb-teleop"]');
+  const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
+  const climbField = document.querySelector('#teleop .field:nth-of-type(4)');
+
+  if (!climbSelected) {
+    isValid = false;
+    if (climbField) {
+      climbField.style.borderRadius = '12px';
+      climbField.style.border = '3px solid #ff4c4c';
+      climbField.style.padding = '12px';
+      climbField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (climbField) {
+    climbField.style.border = '';
+    climbField.style.boxShadow = '';
+    climbField.style.padding = '';
+    climbField.style.borderRadius = '';
+  }
+
+  const climbTeleopSelected = document.querySelector('#teleop input[name="climb-teleop"]:checked');
+  const climbTeleopLabel = climbTeleopSelected?.nextElementSibling?.textContent?.trim() || '';
+  const climbPosField = document.querySelector('#teleop .field:nth-of-type(5)');
+  const climbPosRadios = document.querySelectorAll('#teleop input[name="climbPos"]');
+  const climbPosSelected = Array.from(climbPosRadios).some(rb => rb.checked);
+
+  if (climbTeleopLabel !== 'None' && !climbPosSelected) {
+    isValid = false;
+    if (climbPosField) {
+      climbPosField.style.borderRadius = '12px';
+      climbPosField.style.border = '3px solid #ff4c4c';
+      climbPosField.style.padding = '12px';
+      climbPosField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (climbPosField) {
+    climbPosField.style.border = '';
+    climbPosField.style.boxShadow = '';
+    climbPosField.style.padding = '';
+    climbPosField.style.borderRadius = '';
+  }
+
+  stuckBarRadios.forEach(rb => rb.addEventListener('change', clearTeleopValidationHighlights));
+  climbRadios.forEach(rb => rb.addEventListener('change', clearTeleopValidationHighlights));
+  climbPosRadios.forEach(rb => rb.addEventListener('change', clearTeleopValidationHighlights));
+
+  return isValid;
+}
+
+function validateEndcardsForm() {
+  let isValid = true;
+
+  const shootingRadios = document.querySelectorAll('#endcards input[name="shootingAccuracy"]');
+  const shootingSelected = Array.from(shootingRadios).some(rb => rb.checked);
+  const shootingField = document.querySelector('#endcards .field:nth-of-type(1)');
+
+  if (!shootingSelected) {
+    isValid = false;
+    if (shootingField) {
+      shootingField.style.borderRadius = '12px';
+      shootingField.style.border = '3px solid #ff4c4c';
+      shootingField.style.padding = '12px';
+      shootingField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (shootingField) {
+    shootingField.style.border = '';
+    shootingField.style.boxShadow = '';
+    shootingField.style.padding = '';
+    shootingField.style.borderRadius = '';
+  }
+
+  const defenseOnRadios = document.querySelectorAll('#endcards input[name="defenseOn"]');
+  const defenseOnSelected = Array.from(defenseOnRadios).some(rb => rb.checked);
+  const defenseOnField = document.querySelector('#endcards .field:nth-of-type(2)');
+
+  if (!defenseOnSelected) {
+    isValid = false;
+    if (defenseOnField) {
+      defenseOnField.style.borderRadius = '12px';
+      defenseOnField.style.border = '3px solid #ff4c4c';
+      defenseOnField.style.padding = '12px';
+      defenseOnField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (defenseOnField) {
+    defenseOnField.style.border = '';
+    defenseOnField.style.boxShadow = '';
+    defenseOnField.style.padding = '';
+    defenseOnField.style.borderRadius = '';
+  }
+
+  const robotDefenseRadios = document.querySelectorAll('#endcards input[name="robotDefense"]');
+  const robotDefenseSelected = Array.from(robotDefenseRadios).some(rb => rb.checked);
+  const robotDefenseField = document.querySelector('#endcards .field:nth-of-type(3)');
+
+  if (!robotDefenseSelected) {
+    isValid = false;
+    if (robotDefenseField) {
+      robotDefenseField.style.borderRadius = '12px';
+      robotDefenseField.style.border = '3px solid #ff4c4c';
+      robotDefenseField.style.padding = '12px';
+      robotDefenseField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (robotDefenseField) {
+    robotDefenseField.style.border = '';
+    robotDefenseField.style.boxShadow = '';
+    robotDefenseField.style.padding = '';
+    robotDefenseField.style.borderRadius = '';
+  }
+
+  const driverSkillRadios = document.querySelectorAll('#endcards input[name="driverSkill"]');
+  const driverSkillSelected = Array.from(driverSkillRadios).some(rb => rb.checked);
+  const driverSkillField = document.querySelector('#endcards .field:nth-of-type(4)');
+
+  if (!driverSkillSelected) {
+    isValid = false;
+    if (driverSkillField) {
+      driverSkillField.style.borderRadius = '12px';
+      driverSkillField.style.border = '3px solid #ff4c4c';
+      driverSkillField.style.padding = '12px';
+      driverSkillField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (driverSkillField) {
+    driverSkillField.style.border = '';
+    driverSkillField.style.boxShadow = '';
+    driverSkillField.style.padding = '';
+    driverSkillField.style.borderRadius = '';
+  }
+
+  const diedRadios = document.querySelectorAll('#endcards input[name="died"]');
+  const diedSelected = Array.from(diedRadios).some(rb => rb.checked);
+  const diedField = document.querySelector('#endcards .field:nth-of-type(5)');
+
+  if (!diedSelected) {
+    isValid = false;
+    if (diedField) {
+      diedField.style.borderRadius = '12px';
+      diedField.style.border = '3px solid #ff4c4c';
+      diedField.style.padding = '12px';
+      diedField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (diedField) {
+    diedField.style.border = '';
+    diedField.style.boxShadow = '';
+    diedField.style.padding = '';
+    diedField.style.borderRadius = '';
+  }
+
+  const tippyRadios = document.querySelectorAll('#endcards input[name="tippy"]');
+  const tippySelected = Array.from(tippyRadios).some(rb => rb.checked);
+  const tippyField = document.querySelector('#endcards .field:nth-of-type(6)');
+
+  if (!tippySelected) {
+    isValid = false;
+    if (tippyField) {
+      tippyField.style.borderRadius = '12px';
+      tippyField.style.border = '3px solid #ff4c4c';
+      tippyField.style.padding = '12px';
+      tippyField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (tippyField) {
+    tippyField.style.border = '';
+    tippyField.style.boxShadow = '';
+    tippyField.style.padding = '';
+    tippyField.style.borderRadius = '';
+  }
+
+   const comments = document.getElementById('comments').value.trim();
+   if (!comments) {
+     isValid = false;
+     const commentsField = document.querySelector('#endcards .field:nth-of-type(7)');
+     if (commentsField) {
+       commentsField.style.borderRadius = '12px';
+       commentsField.style.border = '3px solid #ff4c4c';
+       commentsField.style.padding = '12px';
+       commentsField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+     }
+   } else {
+     const commentsField = document.querySelector('#endcards .field:nth-of-type(7)');
+     if (commentsField) {
+       commentsField.style.border = '';
+       commentsField.style.boxShadow = '';
+       commentsField.style.padding = '';
+       commentsField.style.borderRadius = '';
+     }
+   }
+
+  return isValid;
+}
+
+function clearEndcardsValidationHighlights() {
+  document.querySelectorAll('#endcards .field').forEach(field => {
+    const radios = field.querySelectorAll('input[type="radio"]');
+    const selected = Array.from(radios).some(rb => rb.checked);
+    
+    if (selected) {
+      field.style.border = '';
+      field.style.boxShadow = '';
+      field.style.padding = '';
+      field.style.borderRadius = '';
+    }
+  });
+}
+
+document.querySelectorAll('#endcards .option').forEach(opt => {
+  opt.addEventListener('click', clearEndcardsValidationHighlights);
+});
+
+document.getElementById('comments').addEventListener('input', () => {
+  const commentsField = document.querySelector('#endcards .field:nth-of-type(7)');
+  if (commentsField) {
+    commentsField.style.border = '';
+    commentsField.style.boxShadow = '';
+    commentsField.style.padding = '';
+    commentsField.style.borderRadius = '';
+  }
+});
+function validateAutonomousForm() {
+  let isValid = true;
+
+  const fuelCheckboxes = document.querySelectorAll('#autonomous .fuel-option input, #autonomous .fuel-none input');
+  const fuelSelected = Array.from(fuelCheckboxes).some(cb => cb.checked);
+  const fuelField = document.querySelector('#autonomous .field:nth-of-type(1)');
+
+  if (!fuelSelected) {
+    isValid = false;
+    if (fuelField) {
+      fuelField.style.borderRadius = '12px';
+      fuelField.style.border = '3px solid #ff4c4c';
+      fuelField.style.padding = '12px';
+      fuelField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (fuelField) {
+    fuelField.style.border = '';
+    fuelField.style.boxShadow = '';
+    fuelField.style.padding = '';
+    fuelField.style.borderRadius = '';
+  }
+
+  const travelCheckboxes = document.querySelectorAll('#autonomous .travel-option input, #autonomous .travel-na input');
+  const travelSelected = Array.from(travelCheckboxes).some(cb => cb.checked);
+  const travelField = document.querySelector('#autonomous .field:nth-of-type(2)');
+
+  if (!travelSelected) {
+    isValid = false;
+    if (travelField) {
+      travelField.style.borderRadius = '12px';
+      travelField.style.border = '3px solid #ff4c4c';
+      travelField.style.padding = '12px';
+      travelField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (travelField) {
+    travelField.style.border = '';
+    travelField.style.boxShadow = '';
+    travelField.style.padding = '';
+    travelField.style.borderRadius = '';
+  }
+
+  const climbRadios = document.querySelectorAll('#autonomous .climb-option input');
+  const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
+  const climbField = document.querySelector('#autonomous .field:nth-of-type(3)');
+
+  if (!climbSelected) {
+    isValid = false;
+    if (climbField) {
+      climbField.style.borderRadius = '12px';
+      climbField.style.border = '3px solid #ff4c4c';
+      climbField.style.padding = '12px';
+      climbField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (climbField) {
+    climbField.style.border = '';
+    climbField.style.boxShadow = '';
+    climbField.style.padding = '';
+    climbField.style.borderRadius = '';
+  }
+
+  return isValid;
+}
+
+function clearAutonomousValidationHighlights() {
+  document.querySelectorAll('#autonomous .field').forEach(field => {
+    const fuelCheckboxes = field.querySelectorAll('.fuel-option input, .fuel-none input');
+    const travelCheckboxes = field.querySelectorAll('.travel-option input, .travel-na input');
+    const climbRadios = field.querySelectorAll('.climb-option input');
+
+    const fuelSelected = Array.from(fuelCheckboxes).some(cb => cb.checked);
+    const travelSelected = Array.from(travelCheckboxes).some(cb => cb.checked);
+    const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
+
+    if (fuelSelected || travelSelected || climbSelected) {
+      field.style.border = '';
+      field.style.boxShadow = '';
+      field.style.padding = '';
+      field.style.borderRadius = '';
+    }
+  });
+}
+
+document.querySelectorAll('#autonomous .option').forEach(opt => {
+  opt.addEventListener('click', clearAutonomousValidationHighlights);
+});
+
+
+
+// ========== QR PAGE / DATA EXPORT ==========
+
+function collectScoutingData() {
+  const matchNumber = document.getElementById('matchNumber').value;
+  const scouterName = document.getElementById('scouterName').value;
+
+  const allianceRadio = document.querySelector('#setup input[name="alliance"]:checked');
+  const allianceMap = { 'R1': 'r1', 'R2': 'r2', 'R3': 'r3', 'B1': 'b1', 'B2': 'b2', 'B3': 'b3' };
+  const alliancePosition = allianceMap[allianceRadio?.id] || '';
+
+  const teamNumber = document.getElementById('teamNumber').value;
+  const teamName = document.getElementById('teamName').value;
+
+  const startPosRadio = document.querySelector('#setup input[name="startPos"]:checked');
+  const startPosMap = { 'outpost': 'o', 'center': 'c', 'depot': 'd' };
+  const startingPosition = startPosMap[startPosRadio?.id] || '';
+
+  const fuelCollection = Array.from(document.querySelectorAll('#autonomous .fuel-option input, #autonomous .fuel-none input'))
+    .filter(cb => cb.checked)
+    .map(cb => cb.nextElementSibling.textContent)
+    .join(', ');
+
+  const travel = Array.from(document.querySelectorAll('#autonomous .travel-option input, #autonomous .travel-na input'))
+    .filter(cb => cb.checked)
+    .map(cb => cb.nextElementSibling.textContent)
+    .join(', ');
+
+  const autoClimbRadio = document.querySelector('#autonomous input[name="climb-auto"]:checked');
+  const autoClimbMap = { 'Level 1': '1', 'Failed': '.5', 'None': '0' };
+  const autoClimb = autoClimbMap[autoClimbRadio?.nextElementSibling?.textContent?.trim()] || '';
+
+  const stuckOnBarRadio = document.querySelector('#teleop input[name="stuckBar"]:checked');
+  const stuckOnBarMap = { 'Yes': '1', 'No': '0' };
+  let stuckOnBar = stuckOnBarMap[stuckOnBarRadio?.nextElementSibling?.textContent?.trim()] || '';
+
+  if (autoClimb === '0' || autoClimb === '.5') {
+    stuckOnBar = '-';
+  }
+
+  let climbTime = document.getElementById('climbDuration').value;
+
+  const teleClimbRadio = document.querySelector('#teleop input[name="climb-teleop"]:checked');
+  const teleClimbMap = { 'Level 3': '3', 'Level 2': '2', 'Level 1': '1', 'Failed': '.5', 'None': '0' };
+  const teleClimb = teleClimbMap[teleClimbRadio?.nextElementSibling?.textContent?.trim()] || '';
+
+  const climbPosRadio = document.querySelector('#teleop input[name="climbPos"]:checked');
+  const climbPosMap = { 'Depot': 'd', 'Center': 'c', 'Outpost': 'o' };
+  let climbPosition = climbPosMap[climbPosRadio?.nextElementSibling?.textContent?.trim()] || '';
+
+  if (teleClimb === '0') {
+    climbPosition = '-';
+    climbTime = '-';
+  }
+  const defenseOnRobotRadio = document.querySelector('#endcards input[name="defenseOn"]:checked');
+  const defenseOnRobotMap = { 'Yes': '1', 'No': '0' };
+  const defenseOnRobot = defenseOnRobotMap[defenseOnRobotRadio?.nextElementSibling?.textContent?.trim()] || '';
+
+  const robotDefenseRadio = document.querySelector('#endcards input[name="robotDefense"]:checked');
+  const robotDefenseMap = { 'Did Not Defend': '0', 'Ineffective': '1', 'Average': '2', 'Effective': '3' };
+  const robotDefense = robotDefenseMap[robotDefenseRadio?.nextElementSibling?.textContent?.trim()] || '';
+
+  const driverSkillRadio = document.querySelector('#endcards input[name="driverSkill"]:checked');
+  const driverSkillMap = { 'Not Observed': '0', 'Ineffective': '1', 'Average': '2', 'Effective': '3' };
+  const driverSkill = driverSkillMap[driverSkillRadio?.nextElementSibling?.textContent?.trim()] || '';
+
+  const robotDiedRadio = document.querySelector('#endcards input[name="died"]:checked');
+  const robotDiedMap = { 'Whole Match': '1', 'Partially': '.5', 'No': '0' };
+  const robotDied = robotDiedMap[robotDiedRadio?.nextElementSibling?.textContent?.trim()] || '';
+
+  const robotTippyRadio = document.querySelector('#endcards input[name="tippy"]:checked');
+  const robotTippyMap = { 'Yes': '1', 'No': '0' };
+  const robotTippy = robotTippyMap[robotTippyRadio?.nextElementSibling?.textContent?.trim()] || '';
+
+  const comments = document.getElementById('comments').value;
+
+  return {
+    matchNumber,
+    scouterName,
+    alliancePosition,
+    teamNumber,
+    teamName,
+    startingPosition,
+    fuelCollection,
+    travel,
+    autoClimb,
+    stuckOnBar,
+    climbTime,
+    teleClimb,
+    climbPosition,
+    defenseOnRobot,
+    robotDefense,
+    driverSkill,
+    robotDied,
+    robotTippy,
+    comments
+  };
+}
+function buildTabSeparatedPayload(data) {
+  const fields = [
+    data.matchNumber,
+    data.scouterName,
+    data.alliancePosition,
+    data.teamNumber,
+    data.teamName,
+    data.startingPosition,
+    data.fuelCollection,
+    data.travel,
+    data.autoClimb,
+    data.stuckOnBar,
+    data.climbTime,
+    data.teleClimb,
+    data.climbPosition,
+    data.defenseOnRobot,
+    data.robotDefense,
+    data.driverSkill,
+    data.robotDied,
+    data.robotTippy,
+    data.comments
+  ];
+
+  const safe = fields.map((v, i) => {
+    let s = (v === undefined || v === null) ? '' : String(v).trim().replace(/\t|\r|\n/g, ' ');
+    if (i !== fields.length - 1 && s === '') s = '-';
+    return s;
+  });
+
+  return safe.join('\t') + '\n';
+}
+
+
+function tabSeparatedToCsv(content) {
+  const lines = content.trim().split(/\r?\n/).filter(l => l.length > 0);
+  const converted = lines.map(line => {
+    const fields = line.split('\t');
+    return fields.map(f => `"${String(f).replace(/"/g, '""')}"`).join(',');
+  }).join('\r\n');
+  return converted + '\r\n';
+}
+
+function downloadScoutingData() {
+  const tsvData = localStorage.getItem('scoutingDataCSV');
+  if (!tsvData) {
+    alert('No scouting data saved yet.');
+    return;
+  }
+
+  const csvContent = tabSeparatedToCsv(tsvData);
+  const content = '\uFEFF' + csvContent;
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+
+  link.setAttribute('href', url);
+  link.setAttribute('download', `scoutingData_${Date.now()}.csv`);
+  link.style.visibility = 'hidden';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function clearScoutingData() {
+  if (confirm('Are you sure you want to clear all scouting data?')) {
+    localStorage.removeItem('scoutingDataCSV');
+    alert('Scouting data cleared.');
+  }
+}
+
+function downloadCSV(csvContent, fileName) {
+  let prepared = csvContent;
+  if (csvContent && csvContent.indexOf('\t') !== -1) {
+    prepared = tabSeparatedToCsv(csvContent);
+  }
+
+  const content = '\uFEFF' + prepared;
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+
+  link.setAttribute('href', url);
+  link.setAttribute('download', fileName);
+  link.style.visibility = 'hidden';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+let qrCodeInstance = null;
+
+function getCheckedValue(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.nextElementSibling.innerText : "";
+}
+
+function getCheckedList(selector) {
+  return [...document.querySelectorAll(selector + " input:checked")]
+    .map(cb => cb.nextElementSibling.innerText)
+    .join(", ");
+}
+
+function saveDataToCSV() {
+  const matchNumber = document.getElementById("matchNumber").value;
+  const scouterName = document.getElementById("scouterName").value;
+  const alliance = document.querySelector('input[name="alliance"]:checked')?.id || "";
+  const teamNumber = document.getElementById("teamNumber").value;
+
+  const startingPositionRaw = getCheckedValue("startPos");
+  const startMap = { 'Outpost': 'O', 'Center': 'C', 'Depot': 'D' };
+  const startingPosition = startMap[startingPositionRaw] || '-';
+
+  const fuelRaw = getCheckedList(".fuel-option");
+  let fuelCollection = '-';
+  if (fuelRaw) {
+    const parts = fuelRaw.split(',').map(s => s.trim());
+    if (parts.includes('None')) {
+      fuelCollection = '-';
+    } else {
+      const map = { 'Neutral': 'N', 'Depot': 'D', 'Outpost': 'O' };
+      fuelCollection = parts.map(p => map[p] || p).join(',');
+    }
+  }
+
+  const travelRaw = getCheckedList(".travel-option");
+  let travel = '-';
+  if (travelRaw) {
+    const parts = travelRaw.split(',').map(s => s.trim());
+    if (parts.includes('N/A')) {
+      travel = '-';
+    } else {
+      const map = { 'Bump': 'B', 'Trench': 'T' };
+      travel = parts.map(p => map[p] || p).join(',');
+    }
+  }
+
+  const climbAutoRaw = getCheckedValue("climb-auto");
+  const climbAutoMap = { 'Level 1': '1', 'Failed': 'F', 'None': '0' };
+  const climbAuto = climbAutoMap[climbAutoRaw] || '-';
+
+  let stuckOnBar = (getCheckedValue("stuckBar") === 'Yes') ? '1' : ((getCheckedValue("stuckBar") === 'No') ? '0' : '-');
+  if (climbAuto === '0' || climbAuto === 'F') stuckOnBar = '-';
+
+  const climbTime = document.getElementById("climbDuration").value || '';
+
+  const climbTeleopRaw = getCheckedValue("climb-teleop");
+  const climbTeleMap = { 'Level 3': '3', 'Level 2': '2', 'Level 1': '1', 'Failed': 'F', 'None': '0' };
+  const climbTeleop = climbTeleMap[climbTeleopRaw] || '-';
+
+  const climbPosRaw = getCheckedValue("climbPos");
+  const climbPosMap = { 'Depot': 'D', 'Center': 'C', 'Outpost': 'O' };
+  let climbPosition = climbPosMap[climbPosRaw] || '-';
+  if (climbTeleop === '0') {
+    climbPosition = '-';
+  }
+
+  const shootingAccuracyRaw = getCheckedValue("shootingAccuracy");
+  const shootingAccuracyMap = {
+    'Poor (0-25%)': '0',
+    'Below Average (26-50%)': '1',
+    'Average (51-75%)': '2',
+    'Excellent (76-100%)': '3'
+  };
+  const shootingAccuracy = shootingAccuracyMap[shootingAccuracyRaw] || '-';
+
+  const defenseOnRobot = (getCheckedValue("defenseOn") === 'Yes') ? '1' : ((getCheckedValue("defenseOn") === 'No') ? '0' : '-');
+
+  const robotDefenseRaw = getCheckedValue("robotDefense");
+  const robotDefenseMap = { 'Did Not Defend': '0', 'Ineffective': '1', 'Average': '2', 'Effective': '3' };
+  const robotDefense = robotDefenseMap[robotDefenseRaw] || '-';
+
+  const driverSkillRaw = getCheckedValue("driverSkill");
+  const driverSkillMap = { 'Not Observed': '0', 'Ineffective': '1', 'Average': '2', 'Effective': '3' };
+  const driverSkill = driverSkillMap[driverSkillRaw] || '-';
+
+  const robotDiedRaw = getCheckedValue("died");
+  const robotDiedMap = { 'Whole Match': '1', 'Partially': '0.5', 'No': '0' };
+  const robotDied = robotDiedMap[robotDiedRaw] || '-';
+
+  const robotTippy = (getCheckedValue("tippy") === 'Yes') ? '1' : ((getCheckedValue("tippy") === 'No') ? '0' : '-');
+
+  const comments = document.getElementById("comments").value.replace(/\t|\n/g, " ");
+
+  function norm(v, allowEmpty = false) {
+    const s = (v === undefined || v === null) ? '' : String(v).trim();
+    if (!allowEmpty && s === '') return '-';
+    return s.replace(/\t|\r|\n/g, ' ');
+  }
+
+  const fields = [
+    norm(matchNumber),
+    norm(scouterName),
+    norm(alliance),
+    norm(teamNumber),
+    norm(startingPosition),
+    norm(fuelCollection),
+    norm(travel),
+    norm(climbAuto),
+    norm(stuckOnBar),
+    norm(climbTime),
+    norm(climbTeleop),
+    norm(climbPosition),
+    norm(shootingAccuracy),  
+    norm(defenseOnRobot),
+    norm(robotDefense),
+    norm(driverSkill),
+    norm(robotDied),
+    norm(robotTippy),
+    norm(comments, true)
+  ];
+
+  const row = fields.map(cleanField).join("\t");
+
+  const csvKey = 'scoutingDataCSV';
+  const header = "Match Number\tScouter Name\tAlliance\tTeam Number\tStarting Position\tFuel Collection\tTravel\tClimb Auto\tStuck On Bar\tClimb Time\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
+  const existing = localStorage.getItem(csvKey);
+  const newRow = row + '\n';
+
+  if (!existing) {
+    localStorage.setItem(csvKey, header + newRow);
+  } else {
+    localStorage.setItem(csvKey, existing + newRow);
+  }
+
+  const qrPayload = row + '\n';
+  generateQRCode(qrPayload);
+}
+function generateQRCode(cleanData) {
+  const qrContainer = document.getElementById("qrContainer");
+  const qrDataText = document.getElementById("qrDataText");
+
+  qrContainer.innerHTML = "";
+
+  qrCodeInstance = new QRCode(qrContainer, {
+    text: cleanData,
+    width: 300,
+    height: 300,
+    correctLevel: QRCode.CorrectLevel.H,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+  });
+
+  qrDataText.value = cleanData;
+}
+
+function cleanField(v) {
+  if (v === undefined || v === null) return '-';
+  return String(v).replace(/[\r\n\t]+/g, ' ').trim() || '-';
+}
+

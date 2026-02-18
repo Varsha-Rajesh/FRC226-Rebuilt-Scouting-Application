@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/style.css" />
+  <title>SharkScout</title>
+</head>
+
+<body>
+  <div class="container">
+    <!-- ========== SETUP PAGE ========== -->
+    <section id="setup" class="section active">
+      <img src="images/menu.png" alt="Menu" id="masterMenuBtn" class="setup-menu-icon" />
+      <h1>Set Up</h1>
+
+      <div class="field">
+        <label for="matchNumber">Match Number</label>
+        <input type="number" id="matchNumber" placeholder="Enter match #" />
+      </div>
+
+      <div class="field">
+        <label for="scouterName">Scouter Name</label>
+        <input type="text" id="scouterName" placeholder="Enter your name" />
+      </div>
+
+      <div class="field">
+        <label>Alliance Position</label>
+        <div class="alliance-options">
+          <div class="option" id="R1option">
+            <input type="radio" name="alliance" id="R1">
+            <label for="R1">Red 1</label>
+          </div>
+          <div class="option" id="B1option">
+            <input type="radio" name="alliance" id="B1">
+            <label for="B1">Blue 1</label>
+          </div>
+
+          <div class="option" id="R2option">
+            <input type="radio" name="alliance" id="R2">
+            <label for="R2">Red 2</label>
+          </div>
+          <div class="option" id="B2option">
+            <input type="radio" name="alliance" id="B2">
+            <label for="B2">Blue 2</label>
+          </div>
+
+          <div class="option" id="R3option">
+            <input type="radio" name="alliance" id="R3">
+            <label for="R3">Red 3</label>
+          </div>
+          <div class="option" id="B3option">
+            <input type="radio" name="alliance" id="B3">
+            <label for="B3">Blue 3</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="teamNumber">Team Number</label>
+        <input type="number" id="teamNumber" placeholder="Enter team #" />
+      </div>
+
+      <div class="field">
+        <label for="teamName">Team Name</label>
+        <input type="text" id="teamName" placeholder="Enter team name" readonly onkeydown="return false;"
+          onpaste="return false;" />
+      </div>
+
+      <div class="field">
+        <label>Starting Position</label>
+
+        <div class="start-pos-wrapper">
+          <div class="start-pos-wrapper">
+            <img id="startPosImage" src="images/red_startingPos.png" alt="Starting Position">
+          </div>
+        </div>
+
+
+        <div class="start-options">
+          <div class="option">
+            <input type="radio" name="startPos" id="outpost">
+            <label for="outpost">Outpost</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="startPos" id="center">
+            <label for="center">Center</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="startPos" id="depot">
+            <label for="depot">Depot</label>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="next-button-container">
+        <button class="next-button" onclick="if (validateSetupForm()) { goToSection('autonomous'); }">Next</button>
+      </div>
+    </section>
+
+    <!-- ========== AUTONOMOUS PAGE ========== -->
+    <section id="autonomous" class="section">
+      <h1>Autonomous</h1>
+
+      <div class="field">
+        <label>Fuel Collection (Select all that apply)</label>
+
+        <div class="multi-select">
+          <div class="option fuel-option">
+            <input type="checkbox" id="neutral">
+            <label for="neutral">Neutral</label>
+          </div>
+          <div class="option fuel-option">
+            <input type="checkbox" id="depot-fuel">
+            <label for="depot-fuel">Depot</label>
+          </div>
+          <div class="option fuel-option">
+            <input type="checkbox" id="outpost-fuel">
+            <label for="outpost-fuel">Outpost</label>
+          </div>
+          <div class="option fuel-none">
+            <input type="checkbox" id="none-fuel">
+            <label for="none-fuel">None</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Travel (Select all that apply)</label>
+        <div class="multi-select">
+          <div class="option travel-option">
+            <input type="checkbox" id="bump">
+            <label for="bump">Bump</label>
+          </div>
+          <div class="option travel-option">
+            <input type="checkbox" id="trench">
+            <label for="trench">Trench</label>
+          </div>
+          <div class="option travel-na">
+            <input type="checkbox" id="naTravel">
+            <label for="naTravel">N/A</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Climb</label>
+        <div class="radio-select">
+          <div class="option climb-option"><input type="radio" name="climb-auto"><label>Level 1</label></div>
+          <div class="option climb-option"><input type="radio" name="climb-auto"><label>Failed</label></div>
+          <div class="option climb-option none-climb"><input type="radio" name="climb-auto"><label>None</label></div>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="back-btn" onclick="goToSection('setup')">Back</button>
+        <button class="next-btn" onclick="if (validateAutonomousForm()) { goToSection('teleop'); }">Next</button>
+      </div>
+    </section>
+
+    <!-- ========== TELEOP PAGE ========== -->
+    <section id="teleop" class="section">
+      <h1>Teleop</h1>
+
+      <div class="field">
+        <label>Stuck on Bar</label>
+        <div class="radio-select">
+          <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>Yes</label></div>
+          <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>No</label></div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+
+        <button id="climbHoldButton" type="button">
+          Hold to time climb
+        </button>
+
+        <div style="width:100%; display:flex; justify-content:flex-end;">
+          <button id="climbResetButton" type="button" class="reset-button">
+            Reset
+          </button>
+        </div>
+
+      </div>
+
+      <div id="climbHoldDisplay">0.00s</div>
+      <input type="hidden" id="climbDuration" value="">
+
+
+
+      <div class="field">
+        <label>Climb</label>
+        <div class="radio-select">
+          <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Level 3</label></div>
+          <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Level 2</label></div>
+          <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Level 1</label></div>
+          <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Failed</label></div>
+          <div class="option climb-option none-climb"><input type="radio" name="climb-teleop"><label>None</label></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Climb Position</label>
+        <div class="radio-select">
+          <div class="option climb-pos"><input type="radio" name="climbPos"><label>Depot</label></div>
+          <div class="option climb-pos"><input type="radio" name="climbPos"><label>Center</label></div>
+          <div class="option climb-pos"><input type="radio" name="climbPos"><label>Outpost</label></div>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="back-btn" onclick="goToSection('autonomous')">Back</button>
+        <button class="next-btn" onclick="if (validateTeleopForm()) { goToSection('endcards'); }">Next</button>
+      </div>
+    </section>
+
+    <!-- ========== ENDCARDS PAGE ========== -->
+    <section id="endcards" class="section">
+      <h1>Match Review</h1>
+
+      <div class="field">
+        <label>Shooting Accuracy</label>
+        <div class="radio-select-column shooting-accuracy">
+          <div class="option">
+            <input type="radio" name="shootingAccuracy" id="shootingPoor">
+            <label for="shootingPoor">Poor (0-25%)</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="shootingAccuracy" id="shootingBelowAvg">
+            <label for="shootingBelowAvg">Below Average (26-50%)</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="shootingAccuracy" id="shootingAvg">
+            <label for="shootingAvg">Average (51-75%)</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="shootingAccuracy" id="shootingExcellent">
+            <label for="shootingExcellent">Excellent (76-100%)</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Defense Played on Robot</label>
+        <div class="radio-select-column defense-on">
+          <div class="option">
+            <input type="radio" name="defenseOn" id="defOnYes">
+            <label for="defOnYes">Yes</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="defenseOn" id="defOnNo">
+            <label for="defOnNo">No</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Robot Played Defense</label>
+        <div class="radio-select-column robot-defense">
+          <div class="option">
+            <input type="radio" name="robotDefense" id="noDef">
+            <label for="noDef">Did Not Defend</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="robotDefense" id="ineffectiveDef">
+            <label for="ineffectiveDef">Ineffective</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="robotDefense" id="avgDef">
+            <label for="avgDef">Average</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="robotDefense" id="effectiveDef">
+            <label for="effectiveDef">Effective</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Driver Skill</label>
+        <div class="radio-select-column driver-skill">
+          <div class="option">
+            <input type="radio" name="driverSkill" id="driverNA">
+            <label for="driverNA">Not Observed</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="driverSkill" id="driverBad">
+            <label for="driverBad">Ineffective</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="driverSkill" id="driverAvg">
+            <label for="driverAvg">Average</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="driverSkill" id="driverGood">
+            <label for="driverGood">Effective</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Robot Died or Immobilized</label>
+        <div class="radio-select-column died">
+          <div class="option">
+            <input type="radio" name="died" id="wholeMatch">
+            <label for="wholeMatch">Whole Match</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="died" id="partialMatch">
+            <label for="partialMatch">Partially</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="died" id="noDied">
+            <label for="noDied">No</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Robot Tippy</label>
+        <div class="radio-select-column tippy">
+          <div class="option">
+            <input type="radio" name="tippy" id="tippyYes">
+            <label for="tippyYes">Yes</label>
+          </div>
+          <div class="option">
+            <input type="radio" name="tippy" id="tippyNo">
+            <label for="tippyNo">No</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Comments</label>
+        <textarea class="comments-box" id="comments" maxlength="500"
+          placeholder="Anything notable? Defense style, shooting accuracy, penalties, reliability issues..."></textarea>
+        <div id="comments-counter" style="text-align:right; font-size:0.9rem; color:#aaa;">
+          500 characters remaining
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="back-btn" onclick="goToSection('teleop')">Back</button>
+        <button class="next-btn"
+          onclick="if (validateEndcardsForm()) { saveDataToCSV(); goToSection('qr'); }">Submit</button>
+      </div>
+    </section>
+    <!-- ========== QR PAGE ========== -->
+    <section id="qr" class="section">
+      <h1>Submit Scouting Data</h1>
+      <div class="field">
+        <label style="margin-bottom: 30px;">Your scouting data is ready to be submitted!</label>
+        <div id="qrContainerWrapper" style="text-align:center; margin:30px 0;">
+          <div id="qrContainer" style="display:inline-block; background:#ffffff; padding:40px; border-radius:14px;">
+          </div>
+          <textarea id="qrDataText"
+            style="color:white; background-color:#1a1c1f; margin-top:20px; width:90%; max-width:500px; height:120px; resize:none; font-family:monospace;"
+            readonly></textarea>
+        </div>
+
+      </div>
+
+      <div class="nav-buttons">
+        <button class="next-btn" onclick="resetFormForNewEntry(); goToSection('setup');">New Entry</button>
+
+      </div>
+    </section>
+
+    <!-- ========== MASTER CONTROLS ========== -->
+    <section id="master-controls" class="section">
+      <img src="images/back_arrow.png" alt="Back" class="master-back-arrow" onclick="goToSection('setup')" />
+
+      <h1>Master Controls</h1>
+
+      <div class="field">
+        <label>Override Alliance Position</label>
+        <div class="alliance-options master-alliance">
+          <div class="option" id="MC-R1">
+            <input type="radio" name="masterAlliance" id="MC_R1">
+            <label for="MC_R1">Red 1</label>
+          </div>
+          <div class="option" id="MC-B1">
+            <input type="radio" name="masterAlliance" id="MC_B1">
+            <label for="MC_B1">Blue 1</label>
+          </div>
+
+          <div class="option" id="MC-R2">
+            <input type="radio" name="masterAlliance" id="MC_R2">
+            <label for="MC_R2">Red 2</label>
+          </div>
+          <div class="option" id="MC-B2">
+            <input type="radio" name="masterAlliance" id="MC_B2">
+            <label for="MC_B2">Blue 2</label>
+          </div>
+
+          <div class="option" id="MC-R3">
+            <input type="radio" name="masterAlliance" id="MC_R3">
+            <label for="MC_R3">Red 3</label>
+          </div>
+          <div class="option" id="MC-B3">
+            <input type="radio" name="masterAlliance" id="MC_B3">
+            <label for="MC_B3">Blue 3</label>
+          </div>
+        </div>
+
+        <div class="next-button-container">
+          <button class="reset-button" style="background-color: #ff4c4c;" onclick="resetAlliance()">Reset</button>
+        </div>
+
+        <div class="field" style="margin-top: 20px; margin-bottom: 20px">
+          <label>Upload Match Schedule</label>
+        </div>
+
+        <div class="csv-upload-status" id="csvUploadStatus">
+          <p style="text-align: center; font-size: 1rem; color: #ccc;">
+            No match schedule uploaded.
+          </p>
+        </div>
+
+        <div class="csv-upload-container">
+          <button class="csv-upload-btn" onclick="document.getElementById('matchScheduleUpload').click()">
+            Upload CSV
+          </button>
+          <button class="csv-delete-btn" onclick="deleteMatchSchedule()">
+            Delete CSV
+          </button>
+          <input type="file" id="matchScheduleUpload" accept=".csv" style="display:none"
+            onchange="handleMatchScheduleUpload(event)">
+        </div>
+
+        <div class="field" style="margin-top: 30px; margin-bottom: 20px">
+          <label>Upload Team Numbers</label>
+        </div>
+
+        <div class="csv-upload-status" id="teamCSVUploadStatus">
+          <p style="text-align: center; font-size: 1rem; color: #ccc;">
+            No team list uploaded.
+          </p>
+        </div>
+
+        <div class="csv-upload-container">
+          <button class="csv-upload-btn" onclick="document.getElementById('teamCSVUpload').click()">
+            Upload CSV
+          </button>
+          <button class="csv-delete-btn" onclick="deleteTeamCSV()">
+            Delete CSV
+          </button>
+          <input type="file" id="teamCSVUpload" accept=".csv" style="display:none"
+            onchange="handleTeamCSVUpload(event)">
+        </div>
+
+        <div class="field" style="margin-top: 30px; margin-bottom: 20px">
+          <label>Scouting Data</label>
+        </div>
+
+        <div class="csv-upload-container">
+          <button class="csv-upload-btn" onclick="downloadScoutingData()">
+            Download CSV
+          </button>
+          <button class="csv-delete-btn" onclick="clearScoutingData()">
+            Clear Data
+          </button>
+        </div>
+
+    </section>
+
+  </div>
+
+  <div id="masterPasswordModal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="masterModalTitle">
+      <h2 id="masterModalTitle">Master Controls</h2>
+      <p>Enter the password to enter the controls</p>
+      <input id="masterPasswordInput" type="password" placeholder="Password" autocomplete="current-password"
+        aria-describedby="masterPasswordError" />
+      <div id="masterPasswordError" class="input-error" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button id="masterPasswordCancel" class="reset-button">Cancel</button>
+        <button id="masterPasswordSubmit" class="next-button">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/qrcode.min.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js")
+          .then(reg => console.log("Service Worker registered", reg))
+          .catch(err => console.error("SW registration failed", err));
+      });
+    }
+  </script>
+
+
+</body>
+
+</html>
