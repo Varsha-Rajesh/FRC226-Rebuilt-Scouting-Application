@@ -1121,6 +1121,20 @@ function resetFormForNewEntry() {
       opt.querySelector('input').style.accentColor = '#1e90ff';
     });
   }
+  if (typeof robotMissing !== 'undefined' && robotMissing) {
+    try {
+      toggleRobotMissing();
+    } catch (err) {
+      robotMissing = false;
+      const robotMissingStatus = document.getElementById('robotMissingStatus');
+      if (robotMissingStatus) robotMissingStatus.style.display = 'none';
+      const robotMissingBtn = document.getElementById('robotMissingBtn');
+      if (robotMissingBtn) {
+        robotMissingBtn.textContent = 'Mark Robot Missing';
+        robotMissingBtn.style.backgroundColor = '#ff4c4c';
+      }
+    }
+  }
 }
 const setupOptions = document.querySelectorAll('#setup .alliance-options .option');
 const allianceLocked = Array.from(setupOptions).some(opt => opt.classList.contains('disabled'));
@@ -1922,81 +1936,114 @@ function saveDataToCSV() {
   const scouterName = document.getElementById("scouterName").value;
   const alliance = document.querySelector('input[name="alliance"]:checked')?.id || "";
   const teamNumber = document.getElementById("teamNumber").value;
+  const teamName = document.getElementById("teamName").value;
 
-  const startingPositionRaw = getCheckedValue("startPos");
-  const startMap = { 'Outpost': 'O', 'Center': 'C', 'Depot': 'D' };
-  const startingPosition = startMap[startingPositionRaw] || '-';
-
-  const fuelRaw = getCheckedList(".fuel-option");
+  let startingPosition = '-';
   let fuelCollection = '-';
-  if (fuelRaw) {
-    const parts = fuelRaw.split(',').map(s => s.trim());
-    if (parts.includes('None')) {
-      fuelCollection = '-';
-    } else {
-      const map = { 'Neutral': 'N', 'Depot': 'D', 'Outpost': 'O' };
-      fuelCollection = parts.map(p => map[p] || p).join(',');
-    }
-  }
-
-  const travelRaw = getCheckedList(".travel-option");
   let travel = '-';
-  if (travelRaw) {
-    const parts = travelRaw.split(',').map(s => s.trim());
-    if (parts.includes('N/A')) {
-      travel = '-';
-    } else {
-      const map = { 'Bump': 'B', 'Trench': 'T' };
-      travel = parts.map(p => map[p] || p).join(',');
-    }
-  }
+  let climbAuto = '-';
+  let stuckOnBar = '-';
+  let climbTime = '';
+  let climbTeleop = '-';
+  let climbPosition = '-';
+  let shootingAccuracy = '-';
+  let defenseOnRobot = '-';
+  let robotDefense = '-';
+  let driverSkill = '-';
+  let robotDied = '-';
+  let robotTippy = '-';
+  let comments = document.getElementById("comments").value.replace(/\t|\n/g, " ");
 
-  const climbAutoRaw = getCheckedValue("climb-auto");
-  const climbAutoMap = { 'Level 1': '1', 'Failed': 'F', 'None': '0' };
-  const climbAuto = climbAutoMap[climbAutoRaw] || '-';
-
-  let stuckOnBar = (getCheckedValue("stuckBar") === 'Yes') ? '1' : ((getCheckedValue("stuckBar") === 'No') ? '0' : '-');
-  if (climbAuto === '0' || climbAuto === 'F') stuckOnBar = '-';
-
-  const climbTime = document.getElementById("climbDuration").value || '';
-
-  const climbTeleopRaw = getCheckedValue("climb-teleop");
-  const climbTeleMap = { 'Level 3': '3', 'Level 2': '2', 'Level 1': '1', 'Failed': 'F', 'None': '0' };
-  const climbTeleop = climbTeleMap[climbTeleopRaw] || '-';
-
-  const climbPosRaw = getCheckedValue("climbPos");
-  const climbPosMap = { 'Depot': 'D', 'Center': 'C', 'Outpost': 'O' };
-  let climbPosition = climbPosMap[climbPosRaw] || '-';
-  if (climbTeleop === '0') {
+  if (robotMissing) {
+    startingPosition = 'R';
+    fuelCollection = '-';
+    travel = '-';
+    climbAuto = '0';
+    stuckOnBar = '-';
+    climbTime = '0';
+    climbTeleop = '0';
     climbPosition = '-';
+    shootingAccuracy = '0';
+    defenseOnRobot = '0';
+    robotDefense = '0';
+    driverSkill = '0';
+    robotDied = '1';
+    robotTippy = '0';
+    comments = 'Robot Missing';
+  } else {
+    const startingPositionRaw = getCheckedValue("startPos");
+    const startMap = { 'Outpost': 'O', 'Center': 'C', 'Depot': 'D' };
+    startingPosition = startMap[startingPositionRaw] || '-';
+
+    const fuelRaw = getCheckedList(".fuel-option");
+    fuelCollection = '-';
+    if (fuelRaw) {
+      const parts = fuelRaw.split(',').map(s => s.trim());
+      if (parts.includes('None')) {
+        fuelCollection = '-';
+      } else {
+        const map = { 'Neutral': 'N', 'Depot': 'D', 'Outpost': 'O' };
+        fuelCollection = parts.map(p => map[p] || p).join(',');
+      }
+    }
+
+    const travelRaw = getCheckedList(".travel-option");
+    travel = '-';
+    if (travelRaw) {
+      const parts = travelRaw.split(',').map(s => s.trim());
+      if (parts.includes('N/A')) {
+        travel = '-';
+      } else {
+        const map = { 'Bump': 'B', 'Trench': 'T' };
+        travel = parts.map(p => map[p] || p).join(',');
+      }
+    }
+
+    const climbAutoRaw = getCheckedValue("climb-auto");
+    const climbAutoMap = { 'Level 1': '1', 'Failed': 'F', 'None': '0' };
+    climbAuto = climbAutoMap[climbAutoRaw] || '-';
+
+    stuckOnBar = (getCheckedValue("stuckBar") === 'Yes') ? '1' : ((getCheckedValue("stuckBar") === 'No') ? '0' : '-');
+    if (climbAuto === '0' || climbAuto === 'F') stuckOnBar = '-';
+
+    climbTime = document.getElementById("climbDuration").value || '';
+
+    const climbTeleopRaw = getCheckedValue("climb-teleop");
+    const climbTeleMap = { 'Level 3': '3', 'Level 2': '2', 'Level 1': '1', 'Failed': 'F', 'None': '0' };
+    climbTeleop = climbTeleMap[climbTeleopRaw] || '-';
+
+    const climbPosRaw = getCheckedValue("climbPos");
+    const climbPosMap = { 'Depot': 'D', 'Center': 'C', 'Outpost': 'O' };
+    climbPosition = climbPosMap[climbPosRaw] || '-';
+    if (climbTeleop === '0') {
+      climbPosition = '-';
+    }
+
+    const shootingAccuracyRaw = getCheckedValue("shootingAccuracy");
+    const shootingAccuracyMap = {
+      'Poor (0-25%)': '0',
+      'Below Average (26-50%)': '1',
+      'Average (51-75%)': '2',
+      'Excellent (76-100%)': '3'
+    };
+    shootingAccuracy = shootingAccuracyMap[shootingAccuracyRaw] || '-';
+
+    defenseOnRobot = (getCheckedValue("defenseOn") === 'Yes') ? '1' : ((getCheckedValue("defenseOn") === 'No') ? '0' : '-');
+
+    const robotDefenseRaw = getCheckedValue("robotDefense");
+    const robotDefenseMap = { 'Did Not Defend': '0', 'Ineffective': '1', 'Average': '2', 'Effective': '3' };
+    robotDefense = robotDefenseMap[robotDefenseRaw] || '-';
+
+    const driverSkillRaw = getCheckedValue("driverSkill");
+    const driverSkillMap = { 'Not Observed': '0', 'Ineffective': '1', 'Average': '2', 'Effective': '3' };
+    driverSkill = driverSkillMap[driverSkillRaw] || '-';
+
+    const robotDiedRaw = getCheckedValue("died");
+    const robotDiedMap = { 'Whole Match': '1', 'Partially': '0.5', 'No': '0' };
+    robotDied = robotDiedMap[robotDiedRaw] || '-';
+
+    robotTippy = (getCheckedValue("tippy") === 'Yes') ? '1' : ((getCheckedValue("tippy") === 'No') ? '0' : '-');
   }
-
-  const shootingAccuracyRaw = getCheckedValue("shootingAccuracy");
-  const shootingAccuracyMap = {
-    'Poor (0-25%)': '0',
-    'Below Average (26-50%)': '1',
-    'Average (51-75%)': '2',
-    'Excellent (76-100%)': '3'
-  };
-  const shootingAccuracy = shootingAccuracyMap[shootingAccuracyRaw] || '-';
-
-  const defenseOnRobot = (getCheckedValue("defenseOn") === 'Yes') ? '1' : ((getCheckedValue("defenseOn") === 'No') ? '0' : '-');
-
-  const robotDefenseRaw = getCheckedValue("robotDefense");
-  const robotDefenseMap = { 'Did Not Defend': '0', 'Ineffective': '1', 'Average': '2', 'Effective': '3' };
-  const robotDefense = robotDefenseMap[robotDefenseRaw] || '-';
-
-  const driverSkillRaw = getCheckedValue("driverSkill");
-  const driverSkillMap = { 'Not Observed': '0', 'Ineffective': '1', 'Average': '2', 'Effective': '3' };
-  const driverSkill = driverSkillMap[driverSkillRaw] || '-';
-
-  const robotDiedRaw = getCheckedValue("died");
-  const robotDiedMap = { 'Whole Match': '1', 'Partially': '0.5', 'No': '0' };
-  const robotDied = robotDiedMap[robotDiedRaw] || '-';
-
-  const robotTippy = (getCheckedValue("tippy") === 'Yes') ? '1' : ((getCheckedValue("tippy") === 'No') ? '0' : '-');
-
-  const comments = document.getElementById("comments").value.replace(/\t|\n/g, " ");
 
   function norm(v, allowEmpty = false) {
     const s = (v === undefined || v === null) ? '' : String(v).trim();
@@ -2009,6 +2056,7 @@ function saveDataToCSV() {
     norm(scouterName),
     norm(alliance),
     norm(teamNumber),
+    norm(teamName),
     norm(startingPosition),
     norm(fuelCollection),
     norm(travel),
@@ -2029,7 +2077,7 @@ function saveDataToCSV() {
   const row = fields.map(cleanField).join("\t");
 
   const csvKey = 'scoutingDataCSV';
-  const header = "Match Number\tScouter Name\tAlliance\tTeam Number\tStarting Position\tFuel Collection\tTravel\tClimb Auto\tStuck On Bar\tClimb Time\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
+  const header = "Match Number\tScouter Name\tAlliance\tTeam Number\tTeam Name\tStarting Position\tFuel Collection\tTravel\tClimb Auto\tStuck On Bar\tClimb Time\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
   const existing = localStorage.getItem(csvKey);
   const newRow = row + '\n';
 
@@ -2065,3 +2113,375 @@ function cleanField(v) {
   return String(v).replace(/[\r\n\t]+/g, ' ').trim() || '-';
 }
 
+// ========== ROBOT MISSING FUNCTIONALITY ==========
+let robotMissing = false;
+const robotMissingBtn = document.getElementById('robotMissingBtn');
+const robotMissingStatus = document.getElementById('robotMissingStatus');
+
+function toggleRobotMissing() {
+  robotMissing = !robotMissing;
+  
+  if (robotMissingBtn) {
+    robotMissingBtn.textContent = robotMissing ? 'Undo Robot Missing' : 'Mark Robot Missing';
+    robotMissingBtn.style.backgroundColor = robotMissing ? '#666' : '#ff4c4c';
+  }
+  
+  if (robotMissingStatus) {
+    robotMissingStatus.style.display = robotMissing ? 'block' : 'none';
+  }
+  
+  const startPosField = document.querySelector('#setup .field:nth-of-type(5)'); 
+  if (startPosField) {
+    startPosField.style.border = '';
+    startPosField.style.boxShadow = '';
+    startPosField.style.padding = '';
+    startPosField.style.borderRadius = '';
+  }
+  
+  if (robotMissing) {
+
+    const requiredFields = ['matchNumber', 'scouterName', 'teamNumber'];
+    requiredFields.forEach(id => {
+      const field = document.getElementById(id);
+      if (field) {
+        field.disabled = false;
+        field.style.opacity = '';
+        field.style.pointerEvents = '';
+      }
+    });
+    
+    const teamNameInput = document.getElementById('teamName');
+    if (teamNameInput && !teamNameInput.disabled) {
+      teamNameInput.disabled = false;
+      teamNameInput.style.opacity = '';
+      teamNameInput.style.pointerEvents = '';
+    }
+    
+    document.querySelectorAll('#setup .alliance-options input, #setup .alliance-options .option').forEach(el => {
+      el.disabled = false;
+      el.style.opacity = '';
+      el.style.pointerEvents = 'auto';
+    });
+    
+    document.querySelectorAll('#setup input[name="startPos"], #setup .start-options .option, #startPosImage').forEach(el => {
+      el.disabled = true;
+      el.style.opacity = '0.3';
+      el.style.pointerEvents = 'none';
+      
+      if (el.tagName === 'INPUT' && el.type === 'radio') {
+        el.checked = false;
+      }
+      
+      if (el.classList && el.classList.contains('option')) {
+        el.classList.remove('highlight');
+      }
+    });
+    
+    const disableSelectors = [
+      '#autonomous input',
+      '#autonomous .option',
+      
+      '#teleop input',
+      '#teleop .option',
+      '#climbHoldButton',
+      '#climbResetButton',
+      
+      '#endcards input',
+      '#endcards .option',
+      '#endcards textarea'
+    ];
+    
+    disableSelectors.forEach(selector => {
+      document.querySelectorAll(selector).forEach(el => {
+        el.disabled = true;
+        el.style.opacity = '0.5';
+        el.style.pointerEvents = 'none';
+        
+        if (el.tagName === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) {
+          el.checked = false;
+        }
+        
+        if (el.classList.contains('option')) {
+          el.classList.remove('highlight', 'red', 'blue');
+          el.style.pointerEvents = 'none';
+        }
+      });
+    });
+    
+    document.querySelectorAll('#endcards textarea').forEach(textarea => {
+      textarea.value = '';
+    });
+    
+    if (climbResetButton) {
+      climbResetButton.click();
+    }
+    
+    if (commentsCounter) {
+      commentsCounter.innerText = '500 characters remaining';
+      commentsCounter.style.color = '#aaa';
+    }
+    
+  } else {
+
+    const allInputs = document.querySelectorAll('input, textarea, button, .option, #startPosImage');
+    allInputs.forEach(el => {
+      el.disabled = false;
+      el.style.opacity = '';
+      el.style.pointerEvents = '';
+    });
+    
+    const selectedAlliance = document.querySelector('#setup input[name="alliance"]:checked');
+    if (selectedAlliance) {
+      setStartPosImageForAlliance(selectedAlliance.id);
+      updateStartPosOrder(selectedAlliance.id);
+    }
+    
+    document.querySelectorAll('.field').forEach(field => {
+      field.style.border = '';
+      field.style.boxShadow = '';
+      field.style.padding = '';
+      field.style.borderRadius = '';
+    });
+  }
+}
+
+if (robotMissingBtn) {
+  robotMissingBtn.replaceWith(robotMissingBtn.cloneNode(true));
+  
+  const freshRobotMissingBtn = document.getElementById('robotMissingBtn');
+  
+  freshRobotMissingBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    toggleRobotMissing();
+    return false; 
+  });
+  
+  freshRobotMissingBtn.type = 'button';
+}
+['matchNumber', 'scouterName', 'teamNumber'].forEach(id => {
+  const field = document.getElementById(id);
+  if (field) {
+    field.addEventListener('input', function() {
+      this.style.borderColor = '';
+      this.style.boxShadow = '';
+    });
+  }
+});
+
+document.querySelectorAll('#setup .alliance-options .option').forEach(opt => {
+  opt.addEventListener('click', function() {
+    const allianceContainer = document.querySelector('#setup .alliance-options').parentElement;
+    allianceContainer.style.border = '';
+    allianceContainer.style.boxShadow = '';
+    allianceContainer.style.padding = '';
+    allianceContainer.style.borderRadius = '';
+  });
+});
+
+const setupNextButton = document.querySelector('#setup .next-button-container .next-button');
+if (setupNextButton) {
+  try { if (setupNextButton.removeAttribute) setupNextButton.removeAttribute('onclick'); } catch (err) {}
+  try { setupNextButton.onclick = null; } catch (err) {}
+  
+  setupNextButton.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    
+    if (robotMissing) {
+      const matchNumber = document.getElementById('matchNumber').value.trim();
+      const scouterName = document.getElementById('scouterName').value.trim();
+      const teamNumber = document.getElementById('teamNumber').value.trim();
+      const teamName = document.getElementById('teamName').value.trim();
+      const allianceSelected = document.querySelector('#setup input[name="alliance"]:checked');
+      
+      let isValid = true;
+      let firstInvalidField = null;
+      
+      const matchField = document.getElementById('matchNumber');
+      if (!matchNumber) {
+        matchField.style.borderColor = '#ff4c4c';
+        matchField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+        matchField.style.outline = '2px solid #ff4c4c';
+        isValid = false;
+        if (!firstInvalidField) firstInvalidField = matchField;
+      } else {
+        matchField.style.borderColor = '';
+        matchField.style.boxShadow = '';
+        matchField.style.outline = '2px solid #2a2d31';
+      }
+      
+      const scouterField = document.getElementById('scouterName');
+      if (!scouterName) {
+        scouterField.style.borderColor = '#ff4c4c';
+        scouterField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+        scouterField.style.outline = '2px solid #ff4c4c';
+        isValid = false;
+        if (!firstInvalidField) firstInvalidField = scouterField;
+      } else {
+        scouterField.style.borderColor = '';
+        scouterField.style.boxShadow = '';
+        scouterField.style.outline = '2px solid #2a2d31';
+      }
+      
+      const teamField = document.getElementById('teamNumber');
+      if (!teamNumber) {
+        teamField.style.borderColor = '#ff4c4c';
+        teamField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+        teamField.style.outline = '2px solid #ff4c4c';
+        isValid = false;
+        if (!firstInvalidField) firstInvalidField = teamField;
+      } else {
+        teamField.style.borderColor = '';
+        teamField.style.boxShadow = '';
+        teamField.style.outline = '2px solid #2a2d31';
+      }
+      
+      const teamNameField = document.getElementById('teamName');
+      const teamCSVUploaded = localStorage.getItem('teamCSV');
+      
+      if (teamCSVUploaded && !teamName) {
+        teamNameField.style.borderColor = '#ff4c4c';
+        teamNameField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+        teamNameField.style.outline = '2px solid #ff4c4c';
+        isValid = false;
+        if (!firstInvalidField) firstInvalidField = teamNameField;
+      } else {
+        teamNameField.style.borderColor = '';
+        teamNameField.style.boxShadow = '';
+        teamNameField.style.outline = '2px solid #2a2d31';
+      }
+      
+      const allianceContainer = document.querySelector('#setup .alliance-options').parentElement;
+      if (!allianceSelected) {
+        allianceContainer.style.borderRadius = '12px';
+        allianceContainer.style.border = '3px solid #ff4c4c';
+        allianceContainer.style.padding = '12px';
+        allianceContainer.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+        isValid = false;
+        if (!firstInvalidField) {
+          allianceContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else {
+        allianceContainer.style.border = '';
+        allianceContainer.style.boxShadow = '';
+        allianceContainer.style.padding = '';
+        allianceContainer.style.borderRadius = '';
+      }
+      const startPosField = document.querySelector('#setup .field:nth-of-type(5)');
+      if (startPosField) {
+        startPosField.style.border = '';
+        startPosField.style.boxShadow = '';
+        startPosField.style.padding = '';
+        startPosField.style.borderRadius = '';
+      }
+      
+      if (isValid) {
+        saveDataToCSV();
+        goToSection('qr');
+        return false;
+      } else if (firstInvalidField) {
+        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+      }
+    } else {
+      if (validateSetupForm()) {
+        goToSection('autonomous');
+      }
+    }
+    return false;
+  }, { passive: false });
+}
+const originalValidateSetupForm = validateSetupForm;
+
+function validateSetupForRobotMissing() {
+  let isValid = true;
+  let firstInvalid = null;
+
+  const matchField = document.getElementById('matchNumber');
+  const scouterField = document.getElementById('scouterName');
+  const teamField = document.getElementById('teamNumber');
+  const allianceContainerEl = document.querySelector('#setup .alliance-options');
+  const allianceContainer = allianceContainerEl ? allianceContainerEl.parentElement : null;
+  const allianceSelected = document.querySelector('#setup input[name="alliance"]:checked');
+
+  [matchField, scouterField, teamField].forEach(f => {
+    if (f) {
+      f.style.borderColor = '';
+      f.style.boxShadow = '';
+      f.style.outline = '2px solid #2a2d31';
+    }
+  });
+  if (allianceContainer) {
+    allianceContainer.style.border = '';
+    allianceContainer.style.boxShadow = '';
+    allianceContainer.style.padding = '';
+    allianceContainer.style.borderRadius = '';
+  }
+
+  if (!matchField || !matchField.value.trim()) {
+    if (matchField) {
+      matchField.style.borderColor = '#ff4c4c';
+      matchField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+      matchField.style.outline = '2px solid #ff4c4c';
+    }
+    isValid = false;
+    if (!firstInvalid && matchField) firstInvalid = matchField;
+  }
+
+  if (!scouterField || !scouterField.value.trim()) {
+    if (scouterField) {
+      scouterField.style.borderColor = '#ff4c4c';
+      scouterField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+      scouterField.style.outline = '2px solid #ff4c4c';
+    }
+    isValid = false;
+    if (!firstInvalid && scouterField) firstInvalid = scouterField;
+  }
+
+  if (!teamField || !teamField.value.trim()) {
+    if (teamField) {
+      teamField.style.borderColor = '#ff4c4c';
+      teamField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+      teamField.style.outline = '2px solid #ff4c4c';
+    }
+    isValid = false;
+    if (!firstInvalid && teamField) firstInvalid = teamField;
+  }
+
+  const teamCSVUploaded = localStorage.getItem('teamCSV');
+  const teamNameField = document.getElementById('teamName');
+  if (teamCSVUploaded && teamNameField && !teamNameField.value.trim()) {
+    teamNameField.style.borderColor = '#ff4c4c';
+    teamNameField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    teamNameField.style.outline = '2px solid #ff4c4c';
+    isValid = false;
+    if (!firstInvalid && teamNameField) firstInvalid = teamNameField;
+  }
+
+  if (!allianceSelected) {
+    if (allianceContainer) {
+      allianceContainer.style.borderRadius = '12px';
+      allianceContainer.style.border = '3px solid #ff4c4c';
+      allianceContainer.style.padding = '12px';
+      allianceContainer.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+    isValid = false;
+    if (!firstInvalid && allianceContainer) firstInvalid = allianceContainer;
+  }
+
+  if (!isValid && firstInvalid && typeof firstInvalid.scrollIntoView === 'function') {
+    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  return isValid;
+}
+
+validateSetupForm = function() {
+  if (robotMissing) {
+    return validateSetupForRobotMissing();
+  }
+  return originalValidateSetupForm();
+};

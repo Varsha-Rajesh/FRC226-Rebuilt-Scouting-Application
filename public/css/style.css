@@ -282,6 +282,23 @@
    min-width: 120px;
  }
 
+#robotMissingBtn.option {
+  justify-content: center;
+  text-align: center;
+  color: #ffffff;
+  background: #1C1E21;
+  border: 2px solid transparent;
+}
+
+#robotMissingBtn.option label {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  color: #ffffff;
+}
+
  .comments-box {
    width: 100%;
    min-height: 180px;
@@ -500,3 +517,68 @@
  #climbHoldDisplay {
    display: none;
  }
+
+.missing-robot-btn {
+  background-color: #ff4c4c;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  width: 100%;
+  max-width: 300px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.missing-robot-btn:hover {
+  background-color: #e63939;
+  transform: scale(1.05);
+}
+
+.missing-robot-btn.active {
+  background-color: #666;
+  border: 2px solid #ff4c4c;
+}
+
+.missing-status {
+  padding: 12px;
+  border-radius: 12px;
+  background: #330000;
+  border: 2px solid #ff4c4c;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.input-disabled {
+  opacity: 0.6 !important;
+  pointer-events: none !important;
+  filter: grayscale(30%);
+}
+
+.input-disabled button,
+button.input-disabled {
+  background: #444 !important;
+  border-color: #666 !important;
+  transform: none !important;
+}
+
+.option.input-disabled {
+  background: #2a2d31 !important;
+  border-color: #444 !important;
+}
