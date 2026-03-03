@@ -77,8 +77,7 @@
           </div>
         </div>
 
-
-        <div class="start-options">
+        <div class="radio-select-column" style="margin-top: 16px;">
           <div class="option">
             <input type="radio" name="startPos" id="outpost">
             <label for="outpost">Outpost</label>
@@ -95,8 +94,9 @@
 
         <div class="field" style="margin-bottom: 20px;">
           <div style="display: flex; justify-content: center; margin-top: 20px;">
-            <button id="robotMissingBtn" type="button" class="option">
-              <label>Robot Missing</label>
+            <button id="robotMissingBtn" type="button" class="option"
+              style="width: 100%; justify-content: center; padding: 12px 24px;">
+              <label style="margin: 0; font-size: 1rem;">Robot Missing</label>
             </button>
           </div>
           <div id="robotMissingStatus" class="missing-status"
@@ -105,8 +105,6 @@
           </div>
         </div>
       </div>
-
-
       <div class="next-button-container">
         <button class="next-button" onclick="if (validateSetupForm()) { goToSection('autonomous'); }">Next</button>
       </div>
@@ -119,7 +117,7 @@
       <div class="field">
         <label>Fuel Collection (Select all that apply)</label>
 
-        <div class="multi-select">
+        <div class="multi-select radio-select-column">
           <div class="option fuel-option">
             <input type="checkbox" id="neutral">
             <label for="neutral">Neutral</label>
@@ -141,7 +139,7 @@
 
       <div class="field">
         <label>Travel (Select all that apply)</label>
-        <div class="multi-select">
+        <div class="multi-select radio-select-column">
           <div class="option travel-option">
             <input type="checkbox" id="bump">
             <label for="bump">Bump</label>
@@ -159,7 +157,7 @@
 
       <div class="field">
         <label>Climb</label>
-        <div class="radio-select">
+        <div class="radio-select radio-select-column">
           <div class="option climb-option"><input type="radio" name="climb-auto"><label>Level 1</label></div>
           <div class="option climb-option"><input type="radio" name="climb-auto"><label>Failed</label></div>
           <div class="option climb-option none-climb"><input type="radio" name="climb-auto"><label>None</label></div>
@@ -178,13 +176,13 @@
 
       <div class="field">
         <label>Stuck on Bar</label>
-        <div class="radio-select">
+        <div class="radio-select-column">
           <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>Yes</label></div>
           <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>No</label></div>
         </div>
       </div>
-      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
 
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
         <button id="climbHoldButton" type="button">
           Hold to time climb
         </button>
@@ -194,17 +192,14 @@
             Reset
           </button>
         </div>
-
       </div>
 
       <div id="climbHoldDisplay">0.00s</div>
       <input type="hidden" id="climbDuration" value="">
 
-
-
       <div class="field">
         <label>Climb</label>
-        <div class="radio-select">
+        <div class="radio-select-column">
           <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Level 3</label></div>
           <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Level 2</label></div>
           <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Level 1</label></div>
@@ -215,7 +210,7 @@
 
       <div class="field">
         <label>Climb Position</label>
-        <div class="radio-select">
+        <div class="radio-select-column">
           <div class="option climb-pos"><input type="radio" name="climbPos"><label>Depot</label></div>
           <div class="option climb-pos"><input type="radio" name="climbPos"><label>Center</label></div>
           <div class="option climb-pos"><input type="radio" name="climbPos"><label>Outpost</label></div>
@@ -227,7 +222,6 @@
         <button class="next-btn" onclick="if (validateTeleopForm()) { goToSection('endcards'); }">Next</button>
       </div>
     </section>
-
     <!-- ========== ENDCARDS PAGE ========== -->
     <section id="endcards" class="section">
       <h1>Match Review</h1>
@@ -364,19 +358,18 @@
       <h1>Submit Scouting Data</h1>
       <div class="field">
         <label style="margin-bottom: 30px;">Your scouting data is ready to be submitted!</label>
-        <div id="qrContainerWrapper" style="text-align:center; margin:30px 0;">
-          <div id="qrContainer" style="display:inline-block; background:#ffffff; padding:40px; border-radius:14px;">
+        <div id="qrContainerWrapper" style="text-align:center; margin:30px 0; position: relative; z-index: 10;">
+          <div id="qrContainer"
+            style="display:inline-block; background:#ffffff; padding:20px; border-radius:14px; position: relative; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
           </div>
           <textarea id="qrDataText"
-            style="color:white; background-color:#1a1c1f; margin-top:20px; width:90%; max-width:500px; height:120px; resize:none; font-family:monospace;"
+            style="color:white; background-color:#1a1c1f; margin-top:20px; width:90%; max-width:500px; height:120px; resize:none; font-family:monospace; position: relative; z-index: 5;"
             readonly></textarea>
         </div>
-
       </div>
 
       <div class="nav-buttons">
         <button class="next-btn" onclick="resetFormForNewEntry(); goToSection('setup');">New Entry</button>
-
       </div>
     </section>
 

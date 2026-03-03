@@ -1165,12 +1165,12 @@ document.querySelectorAll('#teleop .climb-option, #teleop .climb-pos').forEach(o
   opt.querySelector('input').checked = false;
 });
 
-  document.querySelectorAll('#teleop .field').forEach(field => {
-    field.style.border = '';
-    field.style.boxShadow = '';
-    field.style.padding = '';
-    field.style.borderRadius = '';
-  });
+document.querySelectorAll('#teleop .field').forEach(field => {
+  field.style.border = '';
+  field.style.boxShadow = '';
+  field.style.padding = '';
+  field.style.borderRadius = '';
+});
 
 try {
   if (climbHoldButton) {
@@ -1326,7 +1326,7 @@ function clearTeleopValidationHighlights() {
   const stuckBarField = document.querySelector('#teleop .field:nth-of-type(1)');
   const stuckBarRadios = document.querySelectorAll('#teleop input[name="stuckBar"]');
   const stuckBarSelected = Array.from(stuckBarRadios).some(rb => rb.checked);
-  
+
   if (stuckBarSelected && stuckBarField) {
     stuckBarField.style.border = '';
     stuckBarField.style.boxShadow = '';
@@ -1337,7 +1337,7 @@ function clearTeleopValidationHighlights() {
   const climbField = document.querySelector('#teleop .field:nth-of-type(4)');
   const climbRadios = document.querySelectorAll('#teleop input[name="climb-teleop"]');
   const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
-  
+
   if (climbSelected && climbField) {
     climbField.style.border = '';
     climbField.style.boxShadow = '';
@@ -1350,7 +1350,7 @@ function clearTeleopValidationHighlights() {
   const climbPosSelected = Array.from(climbPosRadios).some(rb => rb.checked);
   const climbTeleopSelected = document.querySelector('#teleop input[name="climb-teleop"]:checked');
   const climbTeleopLabel = climbTeleopSelected?.nextElementSibling?.textContent?.trim() || '';
-  
+
   if ((climbTeleopLabel === 'None' || climbPosSelected) && climbPosField) {
     climbPosField.style.border = '';
     climbPosField.style.boxShadow = '';
@@ -1362,7 +1362,7 @@ function clearTeleopValidationHighlights() {
   const stuckBarField = document.querySelector('#teleop .field:nth-of-type(1)');
   const stuckBarRadios = document.querySelectorAll('#teleop input[name="stuckBar"]');
   const stuckBarSelected = Array.from(stuckBarRadios).some(rb => rb.checked);
-  
+
   if (stuckBarSelected && stuckBarField) {
     stuckBarField.style.border = '';
     stuckBarField.style.boxShadow = '';
@@ -1373,7 +1373,7 @@ function clearTeleopValidationHighlights() {
   const climbField = document.querySelector('#teleop .field:nth-of-type(4)');
   const climbRadios = document.querySelectorAll('#teleop input[name="climb-teleop"]');
   const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
-  
+
   if (climbSelected && climbField) {
     climbField.style.border = '';
     climbField.style.boxShadow = '';
@@ -1386,7 +1386,7 @@ function clearTeleopValidationHighlights() {
   const climbPosSelected = Array.from(climbPosRadios).some(rb => rb.checked);
   const climbTeleopSelected = document.querySelector('#teleop input[name="climb-teleop"]:checked');
   const climbTeleopLabel = climbTeleopSelected?.nextElementSibling?.textContent?.trim() || '';
-  
+
   if ((climbTeleopLabel === 'None' || climbPosSelected) && climbPosField) {
     climbPosField.style.border = '';
     climbPosField.style.boxShadow = '';
@@ -1592,25 +1592,25 @@ function validateEndcardsForm() {
     tippyField.style.borderRadius = '';
   }
 
-   const comments = document.getElementById('comments').value.trim();
-   if (!comments) {
-     isValid = false;
-     const commentsField = document.querySelector('#endcards .field:nth-of-type(7)');
-     if (commentsField) {
-       commentsField.style.borderRadius = '12px';
-       commentsField.style.border = '3px solid #ff4c4c';
-       commentsField.style.padding = '12px';
-       commentsField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
-     }
-   } else {
-     const commentsField = document.querySelector('#endcards .field:nth-of-type(7)');
-     if (commentsField) {
-       commentsField.style.border = '';
-       commentsField.style.boxShadow = '';
-       commentsField.style.padding = '';
-       commentsField.style.borderRadius = '';
-     }
-   }
+  const comments = document.getElementById('comments').value.trim();
+  if (!comments) {
+    isValid = false;
+    const commentsField = document.querySelector('#endcards .field:nth-of-type(7)');
+    if (commentsField) {
+      commentsField.style.borderRadius = '12px';
+      commentsField.style.border = '3px solid #ff4c4c';
+      commentsField.style.padding = '12px';
+      commentsField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else {
+    const commentsField = document.querySelector('#endcards .field:nth-of-type(7)');
+    if (commentsField) {
+      commentsField.style.border = '';
+      commentsField.style.boxShadow = '';
+      commentsField.style.padding = '';
+      commentsField.style.borderRadius = '';
+    }
+  }
 
   return isValid;
 }
@@ -1619,7 +1619,7 @@ function clearEndcardsValidationHighlights() {
   document.querySelectorAll('#endcards .field').forEach(field => {
     const radios = field.querySelectorAll('input[type="radio"]');
     const selected = Array.from(radios).some(rb => rb.checked);
-    
+
     if (selected) {
       field.style.border = '';
       field.style.boxShadow = '';
@@ -2065,7 +2065,7 @@ function saveDataToCSV() {
     norm(climbTime),
     norm(climbTeleop),
     norm(climbPosition),
-    norm(shootingAccuracy),  
+    norm(shootingAccuracy),
     norm(defenseOnRobot),
     norm(robotDefense),
     norm(driverSkill),
@@ -2096,18 +2096,38 @@ function generateQRCode(cleanData) {
 
   qrContainer.innerHTML = "";
 
+  const viewportWidth = window.innerWidth;
+  let qrSize = 200; 
+
+  if (viewportWidth <= 380) {
+    qrSize = 200; 
+  } else if (viewportWidth <= 480) {
+    qrSize = 200; 
+  } else if (viewportWidth <= 768) {
+    qrSize = 275; 
+  } else {
+    qrSize = 300; 
+  }
+
   qrCodeInstance = new QRCode(qrContainer, {
     text: cleanData,
-    width: 300,
-    height: 300,
+    width: qrSize,
+    height: qrSize,
     correctLevel: QRCode.CorrectLevel.H,
     colorDark: "#000000",
     colorLight: "#ffffff",
   });
-
+  
+  const qrCanvas = qrContainer.querySelector('canvas');
+  if (qrCanvas) {
+    qrCanvas.style.position = 'relative';
+    qrCanvas.style.zIndex = '10';
+    qrCanvas.style.display = 'block';
+    qrCanvas.style.margin = '0 auto';
+  }
+  
   qrDataText.value = cleanData;
 }
-
 function cleanField(v) {
   if (v === undefined || v === null) return '-';
   return String(v).replace(/[\r\n\t]+/g, ' ').trim() || '-';
@@ -2120,24 +2140,24 @@ const robotMissingStatus = document.getElementById('robotMissingStatus');
 
 function toggleRobotMissing() {
   robotMissing = !robotMissing;
-  
+
   if (robotMissingBtn) {
     robotMissingBtn.textContent = robotMissing ? 'Undo Robot Missing' : 'Mark Robot Missing';
     robotMissingBtn.style.backgroundColor = robotMissing ? '#666' : '#ff4c4c';
   }
-  
+
   if (robotMissingStatus) {
     robotMissingStatus.style.display = robotMissing ? 'block' : 'none';
   }
-  
-  const startPosField = document.querySelector('#setup .field:nth-of-type(5)'); 
+
+  const startPosField = document.querySelector('#setup .field:nth-of-type(5)');
   if (startPosField) {
     startPosField.style.border = '';
     startPosField.style.boxShadow = '';
     startPosField.style.padding = '';
     startPosField.style.borderRadius = '';
   }
-  
+
   if (robotMissing) {
 
     const requiredFields = ['matchNumber', 'scouterName', 'teamNumber'];
@@ -2149,78 +2169,78 @@ function toggleRobotMissing() {
         field.style.pointerEvents = '';
       }
     });
-    
+
     const teamNameInput = document.getElementById('teamName');
     if (teamNameInput && !teamNameInput.disabled) {
       teamNameInput.disabled = false;
       teamNameInput.style.opacity = '';
       teamNameInput.style.pointerEvents = '';
     }
-    
+
     document.querySelectorAll('#setup .alliance-options input, #setup .alliance-options .option').forEach(el => {
       el.disabled = false;
       el.style.opacity = '';
       el.style.pointerEvents = 'auto';
     });
-    
+
     document.querySelectorAll('#setup input[name="startPos"], #setup .start-options .option, #startPosImage').forEach(el => {
       el.disabled = true;
       el.style.opacity = '0.3';
       el.style.pointerEvents = 'none';
-      
+
       if (el.tagName === 'INPUT' && el.type === 'radio') {
         el.checked = false;
       }
-      
+
       if (el.classList && el.classList.contains('option')) {
         el.classList.remove('highlight');
       }
     });
-    
+
     const disableSelectors = [
       '#autonomous input',
       '#autonomous .option',
-      
+
       '#teleop input',
       '#teleop .option',
       '#climbHoldButton',
       '#climbResetButton',
-      
+
       '#endcards input',
       '#endcards .option',
       '#endcards textarea'
     ];
-    
+
     disableSelectors.forEach(selector => {
       document.querySelectorAll(selector).forEach(el => {
         el.disabled = true;
         el.style.opacity = '0.5';
         el.style.pointerEvents = 'none';
-        
+
         if (el.tagName === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) {
           el.checked = false;
         }
-        
+
         if (el.classList.contains('option')) {
           el.classList.remove('highlight', 'red', 'blue');
           el.style.pointerEvents = 'none';
         }
       });
     });
-    
+
     document.querySelectorAll('#endcards textarea').forEach(textarea => {
       textarea.value = '';
     });
-    
+
     if (climbResetButton) {
       climbResetButton.click();
     }
-    
+
     if (commentsCounter) {
       commentsCounter.innerText = '500 characters remaining';
       commentsCounter.style.color = '#aaa';
     }
-    
+
   } else {
 
     const allInputs = document.querySelectorAll('input, textarea, button, .option, #startPosImage');
@@ -2229,13 +2249,13 @@ function toggleRobotMissing() {
       el.style.opacity = '';
       el.style.pointerEvents = '';
     });
-    
+
     const selectedAlliance = document.querySelector('#setup input[name="alliance"]:checked');
     if (selectedAlliance) {
       setStartPosImageForAlliance(selectedAlliance.id);
       updateStartPosOrder(selectedAlliance.id);
     }
-    
+
     document.querySelectorAll('.field').forEach(field => {
       field.style.border = '';
       field.style.boxShadow = '';
@@ -2247,23 +2267,23 @@ function toggleRobotMissing() {
 
 if (robotMissingBtn) {
   robotMissingBtn.replaceWith(robotMissingBtn.cloneNode(true));
-  
+
   const freshRobotMissingBtn = document.getElementById('robotMissingBtn');
-  
-  freshRobotMissingBtn.addEventListener('click', function(e) {
+
+  freshRobotMissingBtn.addEventListener('click', function (e) {
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
     toggleRobotMissing();
-    return false; 
+    return false;
   });
-  
+
   freshRobotMissingBtn.type = 'button';
 }
 ['matchNumber', 'scouterName', 'teamNumber'].forEach(id => {
   const field = document.getElementById(id);
   if (field) {
-    field.addEventListener('input', function() {
+    field.addEventListener('input', function () {
       this.style.borderColor = '';
       this.style.boxShadow = '';
     });
@@ -2271,7 +2291,7 @@ if (robotMissingBtn) {
 });
 
 document.querySelectorAll('#setup .alliance-options .option').forEach(opt => {
-  opt.addEventListener('click', function() {
+  opt.addEventListener('click', function () {
     const allianceContainer = document.querySelector('#setup .alliance-options').parentElement;
     allianceContainer.style.border = '';
     allianceContainer.style.boxShadow = '';
@@ -2282,24 +2302,24 @@ document.querySelectorAll('#setup .alliance-options .option').forEach(opt => {
 
 const setupNextButton = document.querySelector('#setup .next-button-container .next-button');
 if (setupNextButton) {
-  try { if (setupNextButton.removeAttribute) setupNextButton.removeAttribute('onclick'); } catch (err) {}
-  try { setupNextButton.onclick = null; } catch (err) {}
-  
-  setupNextButton.addEventListener('click', function(e) {
+  try { if (setupNextButton.removeAttribute) setupNextButton.removeAttribute('onclick'); } catch (err) { }
+  try { setupNextButton.onclick = null; } catch (err) { }
+
+  setupNextButton.addEventListener('click', function (e) {
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
-    
+
     if (robotMissing) {
       const matchNumber = document.getElementById('matchNumber').value.trim();
       const scouterName = document.getElementById('scouterName').value.trim();
       const teamNumber = document.getElementById('teamNumber').value.trim();
       const teamName = document.getElementById('teamName').value.trim();
       const allianceSelected = document.querySelector('#setup input[name="alliance"]:checked');
-      
+
       let isValid = true;
       let firstInvalidField = null;
-      
+
       const matchField = document.getElementById('matchNumber');
       if (!matchNumber) {
         matchField.style.borderColor = '#ff4c4c';
@@ -2312,7 +2332,7 @@ if (setupNextButton) {
         matchField.style.boxShadow = '';
         matchField.style.outline = '2px solid #2a2d31';
       }
-      
+
       const scouterField = document.getElementById('scouterName');
       if (!scouterName) {
         scouterField.style.borderColor = '#ff4c4c';
@@ -2325,7 +2345,7 @@ if (setupNextButton) {
         scouterField.style.boxShadow = '';
         scouterField.style.outline = '2px solid #2a2d31';
       }
-      
+
       const teamField = document.getElementById('teamNumber');
       if (!teamNumber) {
         teamField.style.borderColor = '#ff4c4c';
@@ -2338,10 +2358,10 @@ if (setupNextButton) {
         teamField.style.boxShadow = '';
         teamField.style.outline = '2px solid #2a2d31';
       }
-      
+
       const teamNameField = document.getElementById('teamName');
       const teamCSVUploaded = localStorage.getItem('teamCSV');
-      
+
       if (teamCSVUploaded && !teamName) {
         teamNameField.style.borderColor = '#ff4c4c';
         teamNameField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
@@ -2353,7 +2373,7 @@ if (setupNextButton) {
         teamNameField.style.boxShadow = '';
         teamNameField.style.outline = '2px solid #2a2d31';
       }
-      
+
       const allianceContainer = document.querySelector('#setup .alliance-options').parentElement;
       if (!allianceSelected) {
         allianceContainer.style.borderRadius = '12px';
@@ -2377,7 +2397,7 @@ if (setupNextButton) {
         startPosField.style.padding = '';
         startPosField.style.borderRadius = '';
       }
-      
+
       if (isValid) {
         saveDataToCSV();
         goToSection('qr');
@@ -2479,7 +2499,7 @@ function validateSetupForRobotMissing() {
   return isValid;
 }
 
-validateSetupForm = function() {
+validateSetupForm = function () {
   if (robotMissing) {
     return validateSetupForRobotMissing();
   }
