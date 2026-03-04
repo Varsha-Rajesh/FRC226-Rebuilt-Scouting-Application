@@ -1,4 +1,4 @@
-const CACHE_NAME = "scouting-app-lake-city-finals";
+const CACHE_NAME = "scouting-app-lake-city-FINALIZE-1.0";
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",

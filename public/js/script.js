@@ -541,7 +541,7 @@ const commentsBox = document.getElementById('comments');
 const commentsCounter = document.getElementById('comments-counter');
 
 commentsBox.addEventListener('input', () => {
-  const remaining = 500 - commentsBox.value.length;
+  const remaining = 75 - commentsBox.value.length;
   commentsCounter.innerText = `${remaining} characters remaining`;
 
   if (remaining === 0) {
@@ -1108,7 +1108,7 @@ function resetFormForNewEntry() {
   });
 
   document.getElementById('comments').value = '';
-  document.getElementById('comments-counter').innerText = '500 characters remaining';
+  document.getElementById('comments-counter').innerText = '75 characters remaining';
   document.getElementById('comments-counter').style.color = '#aaa';
 
   const teamInput = document.getElementById('teamNumber');
@@ -1200,7 +1200,7 @@ if (!allianceLocked) {
 function validateSetupForm() {
   const requiredFields = [
     { id: 'matchNumber', label: 'Match Number', container: null },
-    { id: 'scouterName', label: 'Scouter Name', container: null },
+    { id: 'scouterInitial', label: 'Scouter Initial', container: null },
     { id: 'teamNumber', label: 'Team Number', container: null },
     { id: 'alliance', label: 'Alliance Position', container: '.alliance-options', isRadio: true },
     { id: 'startPos', label: 'Starting Position', container: '.start-options', isRadio: true }
@@ -1302,7 +1302,7 @@ function clearValidationHighlightForField(fieldNameOrElement) {
 }
 
 document.getElementById('matchNumber').addEventListener('input', e => clearValidationHighlightForField(e.target));
-document.getElementById('scouterName').addEventListener('input', e => clearValidationHighlightForField(e.target));
+document.getElementById('scouterInitial').addEventListener('input', e => clearValidationHighlightForField(e.target));
 document.getElementById('teamNumber').addEventListener('input', e => clearValidationHighlightForField(e.target));
 
 document.querySelectorAll('#setup input[type="radio"][name="alliance"]').forEach(radio => {
@@ -1734,14 +1734,13 @@ document.querySelectorAll('#autonomous .option').forEach(opt => {
 
 function collectScoutingData() {
   const matchNumber = document.getElementById('matchNumber').value;
-  const scouterName = document.getElementById('scouterName').value;
+  const scouterInitial = document.getElementById('scouterInitial').value;
 
   const allianceRadio = document.querySelector('#setup input[name="alliance"]:checked');
   const allianceMap = { 'R1': 'r1', 'R2': 'r2', 'R3': 'r3', 'B1': 'b1', 'B2': 'b2', 'B3': 'b3' };
   const alliancePosition = allianceMap[allianceRadio?.id] || '';
 
   const teamNumber = document.getElementById('teamNumber').value;
-  const teamName = document.getElementById('teamName').value;
 
   const startPosRadio = document.querySelector('#setup input[name="startPos"]:checked');
   const startPosMap = { 'outpost': 'o', 'center': 'c', 'depot': 'd' };
@@ -1807,10 +1806,9 @@ function collectScoutingData() {
 
   return {
     matchNumber,
-    scouterName,
+    scouterInitial,
     alliancePosition,
     teamNumber,
-    teamName,
     startingPosition,
     fuelCollection,
     travel,
@@ -1830,10 +1828,9 @@ function collectScoutingData() {
 function buildTabSeparatedPayload(data) {
   const fields = [
     data.matchNumber,
-    data.scouterName,
+    data.scouterInitial,
     data.alliancePosition,
     data.teamNumber,
-    data.teamName,
     data.startingPosition,
     data.fuelCollection,
     data.travel,
@@ -1933,7 +1930,7 @@ function getCheckedList(selector) {
 
 function saveDataToCSV() {
   const matchNumber = document.getElementById("matchNumber").value;
-  const scouterName = document.getElementById("scouterName").value;
+  const scouterInitial = document.getElementById("scouterInitial").value;
   const alliance = document.querySelector('input[name="alliance"]:checked')?.id || "";
   const teamNumber = document.getElementById("teamNumber").value;
   const teamName = document.getElementById("teamName").value;
@@ -2053,10 +2050,9 @@ function saveDataToCSV() {
 
   const fields = [
     norm(matchNumber),
-    norm(scouterName),
+    norm(scouterInitial),
     norm(alliance),
     norm(teamNumber),
-    norm(teamName),
     norm(startingPosition),
     norm(fuelCollection),
     norm(travel),
@@ -2077,7 +2073,7 @@ function saveDataToCSV() {
   const row = fields.map(cleanField).join("\t");
 
   const csvKey = 'scoutingDataCSV';
-  const header = "Match Number\tScouter Name\tAlliance\tTeam Number\tTeam Name\tStarting Position\tFuel Collection\tTravel\tClimb Auto\tStuck On Bar\tClimb Time\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
+  const header = "Match Number\tScouter Initial\tAlliance\tTeam Number\tStarting Position\tFuel Collection\tTravel\tClimb Auto\tStuck On Bar\tClimb Time\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
   const existing = localStorage.getItem(csvKey);
   const newRow = row + '\n';
 
@@ -2096,17 +2092,22 @@ function generateQRCode(cleanData) {
 
   qrContainer.innerHTML = "";
 
-  const viewportWidth = window.innerWidth;
-  let qrSize = 200; 
+  const wrapper = document.getElementById("qrContainerWrapper");
+  let qrSize;
 
-  if (viewportWidth <= 380) {
-    qrSize = 200; 
-  } else if (viewportWidth <= 480) {
-    qrSize = 200; 
-  } else if (viewportWidth <= 768) {
-    qrSize = 275; 
+  if (wrapper) {
+    const wrapperWidth = wrapper.clientWidth;
+    qrSize = wrapperWidth - 40;
+    if (qrSize > 350) qrSize = 350;
+    if (qrSize < 250) qrSize = 250;
   } else {
-    qrSize = 300; 
+    const viewportWidth = window.innerWidth;
+    if (viewportWidth > 768) {
+      qrSize = 300;
+    } else {
+      qrSize = viewportWidth - 30;
+      if (qrSize < 200) qrSize = 200;
+    }
   }
 
   qrCodeInstance = new QRCode(qrContainer, {
@@ -2160,7 +2161,7 @@ function toggleRobotMissing() {
 
   if (robotMissing) {
 
-    const requiredFields = ['matchNumber', 'scouterName', 'teamNumber'];
+    const requiredFields = ['matchNumber', 'scouterInitial', 'teamNumber'];
     requiredFields.forEach(id => {
       const field = document.getElementById(id);
       if (field) {
@@ -2237,7 +2238,7 @@ function toggleRobotMissing() {
     }
 
     if (commentsCounter) {
-      commentsCounter.innerText = '500 characters remaining';
+      commentsCounter.innerText = '100 characters remaining';
       commentsCounter.style.color = '#aaa';
     }
 
@@ -2280,7 +2281,7 @@ if (robotMissingBtn) {
 
   freshRobotMissingBtn.type = 'button';
 }
-['matchNumber', 'scouterName', 'teamNumber'].forEach(id => {
+['matchNumber', 'scouterInitial', 'teamNumber'].forEach(id => {
   const field = document.getElementById(id);
   if (field) {
     field.addEventListener('input', function () {
@@ -2312,7 +2313,7 @@ if (setupNextButton) {
 
     if (robotMissing) {
       const matchNumber = document.getElementById('matchNumber').value.trim();
-      const scouterName = document.getElementById('scouterName').value.trim();
+      const scouterInitial = document.getElementById('scouterInitial').value.trim();
       const teamNumber = document.getElementById('teamNumber').value.trim();
       const teamName = document.getElementById('teamName').value.trim();
       const allianceSelected = document.querySelector('#setup input[name="alliance"]:checked');
@@ -2333,8 +2334,8 @@ if (setupNextButton) {
         matchField.style.outline = '2px solid #2a2d31';
       }
 
-      const scouterField = document.getElementById('scouterName');
-      if (!scouterName) {
+      const scouterField = document.getElementById('scouterInitial');
+      if (!scouterInitial) {
         scouterField.style.borderColor = '#ff4c4c';
         scouterField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
         scouterField.style.outline = '2px solid #ff4c4c';
@@ -2421,7 +2422,7 @@ function validateSetupForRobotMissing() {
   let firstInvalid = null;
 
   const matchField = document.getElementById('matchNumber');
-  const scouterField = document.getElementById('scouterName');
+  const scouterField = document.getElementById('scouterInitial');
   const teamField = document.getElementById('teamNumber');
   const allianceContainerEl = document.querySelector('#setup .alliance-options');
   const allianceContainer = allianceContainerEl ? allianceContainerEl.parentElement : null;
