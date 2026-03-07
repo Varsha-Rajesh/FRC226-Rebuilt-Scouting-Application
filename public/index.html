@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="css/style.css" />
+  <script src="js/bwip-js-min.js"></script>
   <title>SharkScout</title>
 </head>
 
@@ -114,6 +115,39 @@
     <section id="autonomous" class="section">
       <h1>Autonomous</h1>
 
+        <div class="field">
+    <label>Fuel Collected (in balls)</label>
+    <div class="counter-modern">
+      <div class="counter-value-large" id="autoFuelCollected">0</div>
+      <div class="counter-buttons-grid">
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelCollected', -10)">-10</button>
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelCollected', -5)">-5</button>
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelCollected', -1)">-1</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelCollected', 1)">+1</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelCollected', 5)">+5</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelCollected', 10)">+10</button>
+      </div>
+      <input type="hidden" id="autoFuelCollectedInput" value="0">
+    </div>
+  </div>
+
+  <!-- Fuel Ferried Counter -->
+  <div class="field">
+    <label>Fuel Ferried (cycles to depot/outpost)</label>
+    <div class="counter-modern">
+      <div class="counter-value-large" id="autoFuelFerried">0</div>
+      <div class="counter-buttons-grid">
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelFerried', -10)">-10</button>
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelFerried', -5)">-5</button>
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelFerried', -1)">-1</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelFerried', 1)">+1</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelFerried', 5)">+5</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelFerried', 10)">+10</button>
+      </div>
+      <input type="hidden" id="autoFuelFerriedInput" value="0">
+    </div>
+  </div>
+
       <div class="field">
         <label>Fuel Collection (Select all that apply)</label>
 
@@ -174,28 +208,48 @@
     <section id="teleop" class="section">
       <h1>Teleop</h1>
 
-      <div class="field">
-        <label>Stuck on Bar</label>
-        <div class="radio-select-column">
-          <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>Yes</label></div>
-          <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>No</label></div>
-        </div>
+  <div class="field">
+    <label>Stuck on Bar</label>
+    <div class="radio-select-column">
+      <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>Yes</label></div>
+      <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>No</label></div>
+    </div>
+  </div>
+
+  <!-- Teleop Fuel Collected Counter -->
+  <div class="field">
+    <label>Fuel Collected (in balls)</label>
+    <div class="counter-modern">
+      <div class="counter-value-large" id="teleFuelCollected">0</div>
+      <div class="counter-buttons-grid">
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelCollected', -10)">-10</button>
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelCollected', -5)">-5</button>
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelCollected', -1)">-1</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelCollected', 1)">+1</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelCollected', 5)">+5</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelCollected', 10)">+10</button>
       </div>
+      <input type="hidden" id="teleFuelCollectedInput" value="0">
+    </div>
+  </div>
 
-      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
-        <button id="climbHoldButton" type="button">
-          Hold to time climb
-        </button>
-
-        <div style="width:100%; display:flex; justify-content:flex-end;">
-          <button id="climbResetButton" type="button" class="reset-button">
-            Reset
-          </button>
-        </div>
+  <!-- Teleop Fuel Ferried Counter -->
+  <div class="field">
+    <label>Fuel Ferried (cycles to depot/outpost)</label>
+    <div class="counter-modern">
+      <div class="counter-value-large" id="teleFuelFerried">0</div>
+      <div class="counter-buttons-grid">
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelFerried', -10)">-10</button>
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelFerried', -5)">-5</button>
+        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelFerried', -1)">-1</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelFerried', 1)">+1</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelFerried', 5)">+5</button>
+        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelFerried', 10)">+10</button>
       </div>
+      <input type="hidden" id="teleFuelFerriedInput" value="0">
+    </div>
+  </div>
 
-      <div id="climbHoldDisplay">0.00s</div>
-      <input type="hidden" id="climbDuration" value="">
 
       <div class="field">
         <label>Climb</label>
@@ -487,8 +541,8 @@
     </div>
   </div>
 
-  <script src="js/qrcode.min.js"></script>
   <script src="js/script.js"></script>
+  <script src="js/qrcode.min.js"></script>
   <script>
 
     if ("serviceWorker" in navigator) {

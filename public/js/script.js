@@ -6,6 +6,56 @@ function goToSection(sectionId) {
   window.scrollTo(0, 0);
 }
 
+function adjustCounter(valueId, delta) {
+  const valueEl = document.getElementById(valueId);
+  if (!valueEl) return;
+
+  const current = parseInt(valueEl.textContent, 10);
+  const next = Math.max(0, (isNaN(current) ? 0 : current) + delta);
+
+  valueEl.textContent = next;
+
+  const inputEl = document.getElementById(`${valueId}Input`);
+  if (inputEl) {
+    inputEl.value = next;
+  }
+}
+
+function encodeAlliancePosition(raw) {
+  const map = {
+    'R1': 'A',
+    'R2': 'B',
+    'R3': 'C',
+    'B1': 'D',
+    'B2': 'E',
+    'B3': 'F'
+  };
+  return map[String(raw).trim()] || raw;
+}
+
+function encodeFuelCollection(raw) {
+  const key = String(raw || '').trim().toUpperCase();
+  const map = {
+    'N': 'A',
+    'ND': 'B',
+    'NDO': 'C',
+    'D': 'D',
+    'O': 'E',
+    'DO': 'F'
+  };
+  return map[key] || raw;
+}
+
+function encodeTravel(raw) {
+  const key = String(raw || '').trim().toUpperCase();
+  const map = {
+    'B': 'A',
+    'T': 'B',
+    'BT': 'C'
+  };
+  return map[key] || raw;
+}
+
 // ========== AUTONOMOUS PAGE ==========
 
 const fuelOptions = document.querySelectorAll('.fuel-option');
@@ -1069,8 +1119,20 @@ function resetFormForNewEntry() {
     opt.querySelector('input').checked = false;
   });
 
+  const startPosImg = document.getElementById('startPosImage');
+  if (startPosImg) {
+    startPosImg.src = 'images/red_startingPos.png';
+  }
+
   document.querySelectorAll('#autonomous input[type="checkbox"]').forEach(cb => cb.checked = false);
   document.querySelectorAll('#autonomous .option').forEach(opt => opt.classList.remove('highlight', 'disabled'));
+
+  ['autoFuelCollected', 'autoFuelFerried', 'teleFuelCollected', 'teleFuelFerried'].forEach(id => {
+    const valueEl = document.getElementById(id);
+    const inputEl = document.getElementById(`${id}Input`);
+    if (valueEl) valueEl.textContent = '0';
+    if (inputEl) inputEl.value = '0';
+  });
 
   document.querySelectorAll('#autonomous .climb-option').forEach(opt => {
     opt.classList.remove('highlight');
@@ -1737,8 +1799,7 @@ function collectScoutingData() {
   const scouterInitial = document.getElementById('scouterInitial').value;
 
   const allianceRadio = document.querySelector('#setup input[name="alliance"]:checked');
-  const allianceMap = { 'R1': 'r1', 'R2': 'r2', 'R3': 'r3', 'B1': 'b1', 'B2': 'b2', 'B3': 'b3' };
-  const alliancePosition = allianceMap[allianceRadio?.id] || '';
+  const alliancePosition = encodeAlliancePosition(allianceRadio?.id || '');
 
   const teamNumber = document.getElementById('teamNumber').value;
 
@@ -1746,15 +1807,28 @@ function collectScoutingData() {
   const startPosMap = { 'outpost': 'o', 'center': 'c', 'depot': 'd' };
   const startingPosition = startPosMap[startPosRadio?.id] || '';
 
-  const fuelCollection = Array.from(document.querySelectorAll('#autonomous .fuel-option input, #autonomous .fuel-none input'))
+  const fuelRaw = Array.from(document.querySelectorAll('#autonomous .fuel-option input, #autonomous .fuel-none input'))
     .filter(cb => cb.checked)
-    .map(cb => cb.nextElementSibling.textContent)
-    .join(', ');
+    .map(cb => cb.nextElementSibling.textContent);
 
-  const travel = Array.from(document.querySelectorAll('#autonomous .travel-option input, #autonomous .travel-na input'))
+  const fuelMap = { 'Neutral': 'N', 'Depot': 'D', 'Outpost': 'O' };
+  let fuelCollection = (fuelRaw.length === 0 || fuelRaw.includes('None'))
+    ? '-'
+    : fuelRaw.map(p => fuelMap[p] || p).join('');
+  fuelCollection = encodeFuelCollection(fuelCollection);
+
+  const autoFuelCollected = document.getElementById("autoFuelCollectedInput")?.value || '0';
+  const autoFuelFerried = document.getElementById("autoFuelFerriedInput")?.value || '0';
+
+  const travelRaw = Array.from(document.querySelectorAll('#autonomous .travel-option input, #autonomous .travel-na input'))
     .filter(cb => cb.checked)
-    .map(cb => cb.nextElementSibling.textContent)
-    .join(', ');
+    .map(cb => cb.nextElementSibling.textContent);
+
+  const travelMap = { 'Bump': 'B', 'Trench': 'T' };
+  let travel = (travelRaw.length === 0 || travelRaw.includes('N/A'))
+    ? '-'
+    : travelRaw.map(p => travelMap[p] || p).join('');
+  travel = encodeTravel(travel);
 
   const autoClimbRadio = document.querySelector('#autonomous input[name="climb-auto"]:checked');
   const autoClimbMap = { 'Level 1': '1', 'Failed': '.5', 'None': '0' };
@@ -1768,11 +1842,12 @@ function collectScoutingData() {
     stuckOnBar = '-';
   }
 
-  let climbTime = document.getElementById('climbDuration').value;
-
   const teleClimbRadio = document.querySelector('#teleop input[name="climb-teleop"]:checked');
   const teleClimbMap = { 'Level 3': '3', 'Level 2': '2', 'Level 1': '1', 'Failed': '.5', 'None': '0' };
   const teleClimb = teleClimbMap[teleClimbRadio?.nextElementSibling?.textContent?.trim()] || '';
+
+  const teleFuelCollected = document.getElementById("teleFuelCollectedInput")?.value || '0';
+  const teleFuelFerried = document.getElementById("teleFuelFerriedInput")?.value || '0';
 
   const climbPosRadio = document.querySelector('#teleop input[name="climbPos"]:checked');
   const climbPosMap = { 'Depot': 'd', 'Center': 'c', 'Outpost': 'o' };
@@ -1780,7 +1855,6 @@ function collectScoutingData() {
 
   if (teleClimb === '0') {
     climbPosition = '-';
-    climbTime = '-';
   }
   const defenseOnRobotRadio = document.querySelector('#endcards input[name="defenseOn"]:checked');
   const defenseOnRobotMap = { 'Yes': '1', 'No': '0' };
@@ -1811,10 +1885,13 @@ function collectScoutingData() {
     teamNumber,
     startingPosition,
     fuelCollection,
+    autoFuelCollected,
+    autoFuelFerried,
+    teleFuelCollected,
+    teleFuelFerried,
     travel,
     autoClimb,
     stuckOnBar,
-    climbTime,
     teleClimb,
     climbPosition,
     defenseOnRobot,
@@ -1833,10 +1910,13 @@ function buildTabSeparatedPayload(data) {
     data.teamNumber,
     data.startingPosition,
     data.fuelCollection,
+    data.autoFuelCollected,
+    data.autoFuelFerried,
+    data.teleFuelCollected,
+    data.teleFuelFerried,
     data.travel,
     data.autoClimb,
     data.stuckOnBar,
-    data.climbTime,
     data.teleClimb,
     data.climbPosition,
     data.defenseOnRobot,
@@ -1931,16 +2011,20 @@ function getCheckedList(selector) {
 function saveDataToCSV() {
   const matchNumber = document.getElementById("matchNumber").value;
   const scouterInitial = document.getElementById("scouterInitial").value;
-  const alliance = document.querySelector('input[name="alliance"]:checked')?.id || "";
+  const allianceRaw = document.querySelector('input[name="alliance"]:checked')?.id || "";
+  const alliance = encodeAlliancePosition(allianceRaw);
   const teamNumber = document.getElementById("teamNumber").value;
   const teamName = document.getElementById("teamName").value;
 
   let startingPosition = '-';
   let fuelCollection = '-';
+  let autoFuelCollected = '0';
+  let autoFuelFerried = '0';
+  let teleFuelCollected = '0';
+  let teleFuelFerried = '0';
   let travel = '-';
   let climbAuto = '-';
   let stuckOnBar = '-';
-  let climbTime = '';
   let climbTeleop = '-';
   let climbPosition = '-';
   let shootingAccuracy = '-';
@@ -1954,10 +2038,13 @@ function saveDataToCSV() {
   if (robotMissing) {
     startingPosition = 'R';
     fuelCollection = '-';
+    autoFuelCollected = '0';
+    autoFuelFerried = '0';
+    teleFuelCollected = '0';
+    teleFuelFerried = '0';
     travel = '-';
     climbAuto = '0';
     stuckOnBar = '-';
-    climbTime = '0';
     climbTeleop = '0';
     climbPosition = '-';
     shootingAccuracy = '0';
@@ -1980,7 +2067,7 @@ function saveDataToCSV() {
         fuelCollection = '-';
       } else {
         const map = { 'Neutral': 'N', 'Depot': 'D', 'Outpost': 'O' };
-        fuelCollection = parts.map(p => map[p] || p).join(',');
+        fuelCollection = parts.map(p => map[p] || p).join('');
       }
     }
 
@@ -1992,9 +2079,17 @@ function saveDataToCSV() {
         travel = '-';
       } else {
         const map = { 'Bump': 'B', 'Trench': 'T' };
-        travel = parts.map(p => map[p] || p).join(',');
+        travel = parts.map(p => map[p] || p).join('');
       }
     }
+
+    fuelCollection = encodeFuelCollection(fuelCollection);
+    travel = encodeTravel(travel);
+
+    autoFuelCollected = document.getElementById("autoFuelCollectedInput")?.value || '0';
+    autoFuelFerried = document.getElementById("autoFuelFerriedInput")?.value || '0';
+    teleFuelCollected = document.getElementById("teleFuelCollectedInput")?.value || '0';
+    teleFuelFerried = document.getElementById("teleFuelFerriedInput")?.value || '0';
 
     const climbAutoRaw = getCheckedValue("climb-auto");
     const climbAutoMap = { 'Level 1': '1', 'Failed': 'F', 'None': '0' };
@@ -2002,8 +2097,6 @@ function saveDataToCSV() {
 
     stuckOnBar = (getCheckedValue("stuckBar") === 'Yes') ? '1' : ((getCheckedValue("stuckBar") === 'No') ? '0' : '-');
     if (climbAuto === '0' || climbAuto === 'F') stuckOnBar = '-';
-
-    climbTime = document.getElementById("climbDuration").value || '';
 
     const climbTeleopRaw = getCheckedValue("climb-teleop");
     const climbTeleMap = { 'Level 3': '3', 'Level 2': '2', 'Level 1': '1', 'Failed': 'F', 'None': '0' };
@@ -2055,10 +2148,13 @@ function saveDataToCSV() {
     norm(teamNumber),
     norm(startingPosition),
     norm(fuelCollection),
+    norm(autoFuelCollected),
+    norm(autoFuelFerried),
+    norm(teleFuelCollected),
+    norm(teleFuelFerried),
     norm(travel),
     norm(climbAuto),
     norm(stuckOnBar),
-    norm(climbTime),
     norm(climbTeleop),
     norm(climbPosition),
     norm(shootingAccuracy),
@@ -2073,7 +2169,7 @@ function saveDataToCSV() {
   const row = fields.map(cleanField).join("\t");
 
   const csvKey = 'scoutingDataCSV';
-  const header = "Match Number\tScouter Initial\tAlliance\tTeam Number\tStarting Position\tFuel Collection\tTravel\tClimb Auto\tStuck On Bar\tClimb Time\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
+  const header = "Match Number\tScouter Initial\tAlliance\tTeam Number\tStarting Position\tFuel Collection\tAuto Fuel Collected\tAuto Fuel Ferried\tTele Fuel Collected\tTele Fuel Ferried\tTravel\tClimb Auto\tStuck On Bar\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
   const existing = localStorage.getItem(csvKey);
   const newRow = row + '\n';
 
@@ -2241,6 +2337,19 @@ function toggleRobotMissing() {
       commentsCounter.innerText = '100 characters remaining';
       commentsCounter.style.color = '#aaa';
     }
+
+    ['autoFuelCollected', 'autoFuelFerried', 'teleFuelCollected', 'teleFuelFerried'].forEach(id => {
+      const display = document.getElementById(id);
+      const input = document.getElementById(id + 'Input');
+      if (display) display.textContent = '0';
+      if (input) input.value = '0';
+    });
+
+    document.querySelectorAll('#autonomous .counter-modern button, #teleop .counter-modern button').forEach(btn => {
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.pointerEvents = 'none';
+    });
 
   } else {
 
