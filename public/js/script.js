@@ -587,19 +587,23 @@ document.querySelectorAll('#endcards .radio-select-column').forEach(group => {
   });
 });
 
+const COMMENTS_MAX_LENGTH = 150;
 const commentsBox = document.getElementById('comments');
 const commentsCounter = document.getElementById('comments-counter');
 
-commentsBox.addEventListener('input', () => {
-  const remaining = 75 - commentsBox.value.length;
-  commentsCounter.innerText = `${remaining} characters remaining`;
+if (commentsBox) {
+  commentsBox.maxLength = COMMENTS_MAX_LENGTH;
+}
 
-  if (remaining === 0) {
-    commentsCounter.style.color = '#ff4c4c';
-  } else {
-    commentsCounter.style.color = '#aaa';
-  }
-});
+function updateCommentsCounter() {
+  if (!commentsBox || !commentsCounter) return;
+  const remaining = COMMENTS_MAX_LENGTH - commentsBox.value.length;
+  commentsCounter.innerText = `${remaining} characters remaining`;
+  commentsCounter.style.color = remaining === 0 ? '#ff4c4c' : '#aaa';
+}
+
+commentsBox.addEventListener('input', updateCommentsCounter);
+updateCommentsCounter();
 
 // ========== MASTER CONTROLS PAGE ==========
 const masterAllianceOptions = document.querySelectorAll(
@@ -864,12 +868,23 @@ function autofillTeamNumber() {
     teamNameInput.value = '';
   }
 }
-document.getElementById('matchNumber').addEventListener('input', autofillTeamNumber);
+function setupMatchAutofillListeners() {
+  const matchNumberInput = document.getElementById('matchNumber');
+  if (matchNumberInput) {
+    matchNumberInput.addEventListener('input', autofillTeamNumber);
+  }
 
+  allianceOptions.forEach(opt => {
+    opt.addEventListener('click', autofillTeamNumber);
+  });
 
-allianceOptions.forEach(opt => {
-  opt.addEventListener('click', autofillTeamNumber);
-});
+  // If a match number was already entered (e.g., from saved state), ensure we fill team values.
+  if (matchNumberInput && matchNumberInput.value.trim()) {
+    autofillTeamNumber();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', setupMatchAutofillListeners);
 
 function autofillTeamName() {
   const teamNumberInput = document.getElementById('teamNumber');
@@ -2169,7 +2184,7 @@ function saveDataToCSV() {
   const row = fields.map(cleanField).join("\t");
 
   const csvKey = 'scoutingDataCSV';
-  const header = "Match Number\tScouter Initial\tAlliance\tTeam Number\tStarting Position\tFuel Collection\tAuto Fuel Collected\tAuto Fuel Ferried\tTele Fuel Collected\tTele Fuel Ferried\tTravel\tClimb Auto\tStuck On Bar\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
+  const header = "Match Number\tScouter Initial\tAlliance\tTeam Number\tStarting Position\tFuel Collection\tAuto Fuel Shot\tAuto Fuel Ferried\tTele Fuel Shot\tTele Fuel Ferried\tTravel\tClimb Auto\tStuck On Bar\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
   const existing = localStorage.getItem(csvKey);
   const newRow = row + '\n';
 
@@ -2179,7 +2194,8 @@ function saveDataToCSV() {
     localStorage.setItem(csvKey, existing + newRow);
   }
 
-  const qrPayload = row + '\n';
+  // Build a separate QR payload that omits the scouter comments field.
+  const qrPayload = fields.slice(0, -1).map(cleanField).join("\t") + '\n';
   generateQRCode(qrPayload);
 }
 function generateQRCode(cleanData) {
@@ -2210,7 +2226,7 @@ function generateQRCode(cleanData) {
     text: cleanData,
     width: qrSize,
     height: qrSize,
-    correctLevel: QRCode.CorrectLevel.H,
+    correctLevel: QRCode.CorrectLevel.L,
     colorDark: "#000000",
     colorLight: "#ffffff",
   });
@@ -2334,7 +2350,7 @@ function toggleRobotMissing() {
     }
 
     if (commentsCounter) {
-      commentsCounter.innerText = '100 characters remaining';
+      commentsCounter.innerText = '150 characters remaining';
       commentsCounter.style.color = '#aaa';
     }
 
