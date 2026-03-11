@@ -22,8 +22,8 @@
       </div>
 
       <div class="field">
-        <label for="scouterInitial">Scouter Initial</label>
-        <input type="text" id="scouterInitial" placeholder="Enter your initial" maxlength="2" />
+        <label for="scouterName">Scouter Name</label>
+        <input type="text" id="scouterName" placeholder="Enter your name" maxlength="50" />
       </div>
 
       <div class="field">
@@ -115,39 +115,53 @@
     <section id="autonomous" class="section">
       <h1>Autonomous</h1>
 
-        <div class="field">
-    <label>Fuel Shot</label>
-    <div class="counter-modern">
-      <div class="counter-value-large" id="autoFuelCollected">0</div>
-      <div class="counter-buttons-grid">
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelCollected', -10)">-10</button>
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelCollected', -5)">-5</button>
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelCollected', -1)">-1</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelCollected', 1)">+1</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelCollected', 5)">+5</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelCollected', 10)">+10</button>
+      <!-- Fuel Shot Counter -->
+      <div class="field">
+        <label>Fuel Shot</label>
+        <div class="counter-modern">
+          <div class="counter-value-large" id="autoFuelCollected">0</div>
+          <div class="counter-buttons-grid">
+            <!-- Negative buttons (Orange) on top row -->
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('autoFuelCollected', -1)">-1</button>
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('autoFuelCollected', -5)">-5</button>
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('autoFuelCollected', -10)">-10</button>
+            <!-- Positive buttons (Blue) on bottom row -->
+            <button type="button" class="counter-btn-positive"
+              onclick="adjustCounter('autoFuelCollected', 1)">+1</button>
+            <button type="button" class="counter-btn-positive"
+              onclick="adjustCounter('autoFuelCollected', 5)">+5</button>
+            <button type="button" class="counter-btn-positive"
+              onclick="adjustCounter('autoFuelCollected', 10)">+10</button>
+          </div>
+          <input type="hidden" id="autoFuelCollectedInput" value="0">
+        </div>
       </div>
-      <input type="hidden" id="autoFuelCollectedInput" value="0">
-    </div>
-  </div>
 
-  <!-- Fuel Ferried Counter -->
-  <div class="field">
-    <label>Fuel Ferried</label>
-    <div class="counter-modern">
-      <div class="counter-value-large" id="autoFuelFerried">0</div>
-      <div class="counter-buttons-grid">
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelFerried', -10)">-10</button>
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelFerried', -5)">-5</button>
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('autoFuelFerried', -1)">-1</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelFerried', 1)">+1</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelFerried', 5)">+5</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelFerried', 10)">+10</button>
+      <!-- Fuel Ferried Counter -->
+      <div class="field">
+        <label>Fuel Ferried</label>
+        <div class="counter-modern">
+          <div class="counter-value-large" id="autoFuelFerried">0</div>
+          <div class="counter-buttons-grid">
+            <!-- Negative buttons (Orange) on top row -->
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('autoFuelFerried', -1)">-1</button>
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('autoFuelFerried', -5)">-5</button>
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('autoFuelFerried', -10)">-10</button>
+            <!-- Positive buttons (Blue) on bottom row -->
+            <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelFerried', 1)">+1</button>
+            <button type="button" class="counter-btn-positive" onclick="adjustCounter('autoFuelFerried', 5)">+5</button>
+            <button type="button" class="counter-btn-positive"
+              onclick="adjustCounter('autoFuelFerried', 10)">+10</button>
+          </div>
+          <input type="hidden" id="autoFuelFerriedInput" value="0">
+        </div>
       </div>
-      <input type="hidden" id="autoFuelFerriedInput" value="0">
-    </div>
-  </div>
-
       <div class="field">
         <label>Fuel Collection (Select all that apply)</label>
 
@@ -208,48 +222,63 @@
     <section id="teleop" class="section">
       <h1>Teleop</h1>
 
-  <div class="field">
-    <label>Stuck on Bar</label>
-    <div class="radio-select-column">
-      <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>Yes</label></div>
-      <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>No</label></div>
-    </div>
-  </div>
-
-  <!-- Teleop Fuel Collected Counter -->
-  <div class="field">
-    <label>Fuel Shot</label>
-    <div class="counter-modern">
-      <div class="counter-value-large" id="teleFuelCollected">0</div>
-      <div class="counter-buttons-grid">
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelCollected', -10)">-10</button>
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelCollected', -5)">-5</button>
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelCollected', -1)">-1</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelCollected', 1)">+1</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelCollected', 5)">+5</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelCollected', 10)">+10</button>
+      <div class="field">
+        <label>Stuck on Bar</label>
+        <div class="radio-select-column">
+          <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>Yes</label></div>
+          <div class="option stuck-bar-option"><input type="radio" name="stuckBar"><label>No</label></div>
+        </div>
       </div>
-      <input type="hidden" id="teleFuelCollectedInput" value="0">
-    </div>
-  </div>
 
-  <!-- Teleop Fuel Ferried Counter -->
-  <div class="field">
-    <label>Fuel Ferried</label>
-    <div class="counter-modern">
-      <div class="counter-value-large" id="teleFuelFerried">0</div>
-      <div class="counter-buttons-grid">
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelFerried', -10)">-10</button>
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelFerried', -5)">-5</button>
-        <button type="button" class="counter-btn-negative" onclick="adjustCounter('teleFuelFerried', -1)">-1</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelFerried', 1)">+1</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelFerried', 5)">+5</button>
-        <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelFerried', 10)">+10</button>
+      <!-- Teleop Fuel Shot Counter -->
+      <div class="field">
+        <label>Fuel Shot</label>
+        <div class="counter-modern">
+          <div class="counter-value-large" id="teleFuelCollected">0</div>
+          <div class="counter-buttons-grid">
+            <!-- Negative buttons (Orange) on top row -->
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('teleFuelCollected', -1)">-1</button>
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('teleFuelCollected', -5)">-5</button>
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('teleFuelCollected', -10)">-10</button>
+            <!-- Positive buttons (Blue) on bottom row -->
+            <button type="button" class="counter-btn-positive"
+              onclick="adjustCounter('teleFuelCollected', 1)">+1</button>
+            <button type="button" class="counter-btn-positive"
+              onclick="adjustCounter('teleFuelCollected', 5)">+5</button>
+            <button type="button" class="counter-btn-positive"
+              onclick="adjustCounter('teleFuelCollected', 10)">+10</button>
+          </div>
+          <input type="hidden" id="teleFuelCollectedInput" value="0">
+        </div>
       </div>
-      <input type="hidden" id="teleFuelFerriedInput" value="0">
-    </div>
-  </div>
 
+      <!-- Teleop Fuel Ferried Counter -->
+      <div class="field">
+        <label>Fuel Ferried</label>
+        <div class="counter-modern">
+          <div class="counter-value-large" id="teleFuelFerried">0</div>
+          <div class="counter-buttons-grid">
+            <!-- Negative buttons (Orange) on top row -->
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('teleFuelFerried', -1)">-1</button>
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('teleFuelFerried', -5)">-5</button>
+            <button type="button" class="counter-btn-negative"
+              onclick="adjustCounter('teleFuelFerried', -10)">-10</button>
+            <!-- Positive buttons (Blue) on bottom row -->
+            <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelFerried', 1)">+1</button>
+            <button type="button" class="counter-btn-positive" onclick="adjustCounter('teleFuelFerried', 5)">+5</button>
+            <button type="button" class="counter-btn-positive"
+              onclick="adjustCounter('teleFuelFerried', 10)">+10</button>
+          </div>
+          <input type="hidden" id="teleFuelFerriedInput" value="0">
+        </div>
+      </div>
+
+      <!-- CLIMB POSITION IMAGE - ADD THIS SECTION -->
 
       <div class="field">
         <label>Climb</label>
@@ -259,6 +288,13 @@
           <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Level 1</label></div>
           <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Failed</label></div>
           <div class="option climb-option none-climb"><input type="radio" name="climb-teleop"><label>None</label></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Climb Position Diagram</label>
+        <div class="climb-pos-image-wrapper">
+          <img id="climbPosImage" src="images/red_climb.png" alt="Climb Position">
         </div>
       </div>
 
@@ -544,12 +580,38 @@
   <script src="js/script.js"></script>
   <script src="js/qrcode.min.js"></script>
   <script>
-
+    // Register service worker with automatic updates
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js")
-          .then(reg => console.log("Service Worker registered", reg))
-          .catch(err => console.error("SW registration failed", err));
+        navigator.serviceWorker.register("/sw.js").then(reg => {
+          console.log("Service Worker registered", reg);
+
+          // Check for updates every time the page loads
+          reg.update();
+
+          // Listen for new service worker
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            console.log('New service worker found:', newWorker);
+
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New service worker installed, prompt user to refresh
+                console.log('New version available! Please refresh.');
+                // Optional: Show a notification to the user
+                if (confirm('A new version is available. Refresh to update?')) {
+                  window.location.reload();
+                }
+              }
+            });
+          });
+        }).catch(err => console.error("SW registration failed", err));
+
+        // Listen for controller change (when new SW takes over)
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('Controller changed, new service worker activated');
+          window.location.reload();
+        });
       });
     }
   </script>

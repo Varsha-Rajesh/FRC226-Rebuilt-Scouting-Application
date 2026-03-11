@@ -41,7 +41,8 @@ function encodeFuelCollection(raw) {
     'NDO': 'C',
     'D': 'D',
     'O': 'E',
-    'DO': 'F'
+    'DO': 'F',
+    "NO:": 'G'
   };
   return map[key] || raw;
 }
@@ -152,9 +153,29 @@ allianceOptions.forEach(opt => {
     opt.classList.add('highlight');
 
     setStartPosImageForAlliance(radio.id);
+    setClimbPosImageForAlliance(radio.id); // ADD THIS LINE
     updateStartPosOrder(radio.id);
   });
 });
+
+// Add this function with your other image update functions
+const climbPosImage = document.getElementById('climbPosImage');
+
+function setClimbPosImageForAlliance(allianceId) {
+  if (!climbPosImage) return;
+
+  if (!allianceId) {
+    allianceId = document.querySelector('#setup input[name="alliance"]:checked')?.id
+      || document.querySelector('#master-controls input[name="masterAlliance"]:checked')?.id
+      || '';
+  }
+
+  if (allianceId.includes('B')) {
+    climbPosImage.src = 'images/blue_climb.png';
+  } else if (allianceId.includes('R')) {
+    climbPosImage.src = 'images/red_climb.png';
+  }
+}
 const startOptions = document.querySelectorAll('.start-options .option');
 
 startOptions.forEach(opt => {
@@ -632,8 +653,8 @@ masterAllianceOptions.forEach(opt => {
     lockSetupAlliance(radio.id);
 
     setStartPosImageForAlliance(radio.id);
+    setClimbPosImageForAlliance(radio.id); // ADD THIS LINE
     updateStartPosOrder(radio.id);
-
   });
 });
 
@@ -644,6 +665,7 @@ function loadSavedAlliance() {
     if (savedOption) {
       const parentOpt = savedOption.closest('.option');
       parentOpt.click();
+      setClimbPosImageForAlliance(savedAlliance); // ADD THIS LINE
     }
   }
 }
@@ -678,13 +700,13 @@ function lockSetupAlliance(masterId) {
         radio.style.accentColor = '#1e90ff';
       }
       setStartPosImageForAlliance(masterId);
+      setClimbPosImageForAlliance(masterId); // ADD THIS LINE
       updateStartPosOrder(masterId);
     }
 
     opt.classList.add('disabled');
   });
 }
-
 function resetAlliance() {
   if (!confirm("Are you sure you want to reset the alliance position?")) {
     return;
@@ -705,9 +727,9 @@ function resetAlliance() {
     opt.querySelector('input').style.accentColor = '#1e90ff';
   });
   if (startPosImage) startPosImage.src = 'images/red_startingPos.png';
+  if (climbPosImage) climbPosImage.src = 'images/red_climb.png'; // ADD THIS LINE
   clearSetupTeamFields();
 }
-
 
 
 let matchSchedule = [];
@@ -1277,12 +1299,11 @@ if (!allianceLocked) {
 function validateSetupForm() {
   const requiredFields = [
     { id: 'matchNumber', label: 'Match Number', container: null },
-    { id: 'scouterInitial', label: 'Scouter Initial', container: null },
+    { id: 'scouterName', label: 'Scouter Name', container: null }, 
     { id: 'teamNumber', label: 'Team Number', container: null },
     { id: 'alliance', label: 'Alliance Position', container: '.alliance-options', isRadio: true },
     { id: 'startPos', label: 'Starting Position', container: '.start-options', isRadio: true }
   ];
-
   let isValid = true;
   const invalidFields = [];
 
@@ -1379,7 +1400,7 @@ function clearValidationHighlightForField(fieldNameOrElement) {
 }
 
 document.getElementById('matchNumber').addEventListener('input', e => clearValidationHighlightForField(e.target));
-document.getElementById('scouterInitial').addEventListener('input', e => clearValidationHighlightForField(e.target));
+document.getElementById('scouterName').addEventListener('input', e => clearValidationHighlightForField(e.target)); 
 document.getElementById('teamNumber').addEventListener('input', e => clearValidationHighlightForField(e.target));
 
 document.querySelectorAll('#setup input[type="radio"][name="alliance"]').forEach(radio => {
@@ -1526,7 +1547,7 @@ function validateTeleopForm() {
 
   const climbTeleopSelected = document.querySelector('#teleop input[name="climb-teleop"]:checked');
   const climbTeleopLabel = climbTeleopSelected?.nextElementSibling?.textContent?.trim() || '';
-  const climbPosField = document.querySelector('#teleop .field:nth-of-type(5)');
+  const climbPosField = document.querySelector('#teleop .field:nth-of-type(6)');
   const climbPosRadios = document.querySelectorAll('#teleop input[name="climbPos"]');
   const climbPosSelected = Array.from(climbPosRadios).some(rb => rb.checked);
 
@@ -1724,7 +1745,7 @@ function validateAutonomousForm() {
 
   const fuelCheckboxes = document.querySelectorAll('#autonomous .fuel-option input, #autonomous .fuel-none input');
   const fuelSelected = Array.from(fuelCheckboxes).some(cb => cb.checked);
-  const fuelField = document.querySelector('#autonomous .field:nth-of-type(1)');
+  const fuelField = document.querySelector('#autonomous .field:nth-of-type(3)');
 
   if (!fuelSelected) {
     isValid = false;
@@ -1743,7 +1764,7 @@ function validateAutonomousForm() {
 
   const travelCheckboxes = document.querySelectorAll('#autonomous .travel-option input, #autonomous .travel-na input');
   const travelSelected = Array.from(travelCheckboxes).some(cb => cb.checked);
-  const travelField = document.querySelector('#autonomous .field:nth-of-type(2)');
+  const travelField = document.querySelector('#autonomous .field:nth-of-type(4)');
 
   if (!travelSelected) {
     isValid = false;
@@ -1762,7 +1783,7 @@ function validateAutonomousForm() {
 
   const climbRadios = document.querySelectorAll('#autonomous .climb-option input');
   const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
-  const climbField = document.querySelector('#autonomous .field:nth-of-type(3)');
+  const climbField = document.querySelector('#autonomous .field:nth-of-type(5)');
 
   if (!climbSelected) {
     isValid = false;
@@ -1811,7 +1832,7 @@ document.querySelectorAll('#autonomous .option').forEach(opt => {
 
 function collectScoutingData() {
   const matchNumber = document.getElementById('matchNumber').value;
-  const scouterInitial = document.getElementById('scouterInitial').value;
+  const scouterName = document.getElementById('scouterName').value;
 
   const allianceRadio = document.querySelector('#setup input[name="alliance"]:checked');
   const alliancePosition = encodeAlliancePosition(allianceRadio?.id || '');
@@ -1895,7 +1916,7 @@ function collectScoutingData() {
 
   return {
     matchNumber,
-    scouterInitial,
+    scouterName,
     alliancePosition,
     teamNumber,
     startingPosition,
@@ -1920,7 +1941,7 @@ function collectScoutingData() {
 function buildTabSeparatedPayload(data) {
   const fields = [
     data.matchNumber,
-    data.scouterInitial,
+    data.scouterName,
     data.alliancePosition,
     data.teamNumber,
     data.startingPosition,
@@ -2025,7 +2046,7 @@ function getCheckedList(selector) {
 
 function saveDataToCSV() {
   const matchNumber = document.getElementById("matchNumber").value;
-  const scouterInitial = document.getElementById("scouterInitial").value;
+  const scouterName = document.getElementById("scouterName").value;
   const allianceRaw = document.querySelector('input[name="alliance"]:checked')?.id || "";
   const alliance = encodeAlliancePosition(allianceRaw);
   const teamNumber = document.getElementById("teamNumber").value;
@@ -2158,7 +2179,7 @@ function saveDataToCSV() {
 
   const fields = [
     norm(matchNumber),
-    norm(scouterInitial),
+    norm(scouterName),
     norm(alliance),
     norm(teamNumber),
     norm(startingPosition),
@@ -2184,7 +2205,7 @@ function saveDataToCSV() {
   const row = fields.map(cleanField).join("\t");
 
   const csvKey = 'scoutingDataCSV';
-  const header = "Match Number\tScouter Initial\tAlliance\tTeam Number\tStarting Position\tFuel Collection\tAuto Fuel Shot\tAuto Fuel Ferried\tTele Fuel Shot\tTele Fuel Ferried\tTravel\tClimb Auto\tStuck On Bar\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
+  const header = "Match Number\tScouter Name\tAlliance\tTeam Number\tStarting Position\tFuel Collection\tAuto Fuel Shot\tAuto Fuel Ferried\tTele Fuel Shot\tTele Fuel Ferried\tTravel\tClimb Auto\tStuck On Bar\tClimb Teleop\tClimb Position\tShooting Accuracy\tDefense On Robot\tRobot Defense\tDriver Skill\tRobot Died\tRobot Tippy\tComments\n";
   const existing = localStorage.getItem(csvKey);
   const newRow = row + '\n';
 
@@ -2230,7 +2251,7 @@ function generateQRCode(cleanData) {
     colorDark: "#000000",
     colorLight: "#ffffff",
   });
-  
+
   const qrCanvas = qrContainer.querySelector('canvas');
   if (qrCanvas) {
     qrCanvas.style.position = 'relative';
@@ -2238,7 +2259,7 @@ function generateQRCode(cleanData) {
     qrCanvas.style.display = 'block';
     qrCanvas.style.margin = '0 auto';
   }
-  
+
   qrDataText.value = cleanData;
 }
 function cleanField(v) {
@@ -2273,7 +2294,7 @@ function toggleRobotMissing() {
 
   if (robotMissing) {
 
-    const requiredFields = ['matchNumber', 'scouterInitial', 'teamNumber'];
+    const requiredFields = ['matchNumber', 'scouterName', 'teamNumber'];
     requiredFields.forEach(id => {
       const field = document.getElementById(id);
       if (field) {
@@ -2295,6 +2316,13 @@ function toggleRobotMissing() {
       el.style.opacity = '';
       el.style.pointerEvents = 'auto';
     });
+
+    document.querySelectorAll('#setup input[name="startPos"], #setup .start-options .option, #startPosImage, #climbPosImage').forEach(el => {
+      el.disabled = true;
+      el.style.opacity = '0.3';
+      el.style.pointerEvents = 'none';
+    });
+
 
     document.querySelectorAll('#setup input[name="startPos"], #setup .start-options .option, #startPosImage').forEach(el => {
       el.disabled = true;
@@ -2379,9 +2407,9 @@ function toggleRobotMissing() {
     const selectedAlliance = document.querySelector('#setup input[name="alliance"]:checked');
     if (selectedAlliance) {
       setStartPosImageForAlliance(selectedAlliance.id);
+      setClimbPosImageForAlliance(selectedAlliance.id); // ADD THIS LINE
       updateStartPosOrder(selectedAlliance.id);
     }
-
     document.querySelectorAll('.field').forEach(field => {
       field.style.border = '';
       field.style.boxShadow = '';
@@ -2406,7 +2434,7 @@ if (robotMissingBtn) {
 
   freshRobotMissingBtn.type = 'button';
 }
-['matchNumber', 'scouterInitial', 'teamNumber'].forEach(id => {
+['matchNumber', 'scouterName', 'teamNumber'].forEach(id => {
   const field = document.getElementById(id);
   if (field) {
     field.addEventListener('input', function () {
@@ -2438,7 +2466,7 @@ if (setupNextButton) {
 
     if (robotMissing) {
       const matchNumber = document.getElementById('matchNumber').value.trim();
-      const scouterInitial = document.getElementById('scouterInitial').value.trim();
+      const scouterName = document.getElementById('scouterName').value.trim();
       const teamNumber = document.getElementById('teamNumber').value.trim();
       const teamName = document.getElementById('teamName').value.trim();
       const allianceSelected = document.querySelector('#setup input[name="alliance"]:checked');
@@ -2459,8 +2487,8 @@ if (setupNextButton) {
         matchField.style.outline = '2px solid #2a2d31';
       }
 
-      const scouterField = document.getElementById('scouterInitial');
-      if (!scouterInitial) {
+      const scouterField = document.getElementById('scouterName');
+      if (!scouterName) {
         scouterField.style.borderColor = '#ff4c4c';
         scouterField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
         scouterField.style.outline = '2px solid #ff4c4c';
@@ -2547,7 +2575,7 @@ function validateSetupForRobotMissing() {
   let firstInvalid = null;
 
   const matchField = document.getElementById('matchNumber');
-  const scouterField = document.getElementById('scouterInitial');
+  const scouterField = document.getElementById('scouterName');
   const teamField = document.getElementById('teamNumber');
   const allianceContainerEl = document.querySelector('#setup .alliance-options');
   const allianceContainer = allianceContainerEl ? allianceContainerEl.parentElement : null;

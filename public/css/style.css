@@ -726,3 +726,96 @@ button.input-disabled {
     gap: 6px;
   }
 }
+/* Add to your style.css file */
+.climb-pos-image-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0;
+}
+
+#climbPosImage {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.counter-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.counter-btn-positive,
+.counter-btn-negative {
+  border: none;
+  border-radius: 14px;
+  padding: 24px 8px; /* Increased padding for taller buttons */
+  font-size: 1.5rem; /* Slightly larger font */
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-height: 100px; /* Increased min-height for taller buttons */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Positive buttons - Blue */
+.counter-btn-positive {
+  background: linear-gradient(145deg, #1e90ff, #0a6bc2);
+  border-bottom: 4px solid #0a4a8a;
+}
+
+/* Negative buttons - Orange */
+.counter-btn-negative {
+  background: linear-gradient(145deg, #cc5500, #b34700); /* Burnt orange */
+  border-bottom: 4px solid #8b3a00;
+}
+
+.counter-btn-positive:active,
+.counter-btn-negative:active {
+  border-bottom-width: 0;
+  transform: translateY(4px);
+}
+
+.counter-btn-positive:hover,
+.counter-btn-negative:hover {
+  filter: brightness(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .counter-btn-positive,
+  .counter-btn-negative {
+    padding: 20px 4px;
+    font-size: 1.3rem;
+    min-height: 100px;
+  }
+  
+  .counter-buttons-grid {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .counter-btn-positive,
+  .counter-btn-negative {
+    padding: 16px 2px;
+    font-size: 1.1rem;
+    min-height: 100px;
+  }
+  
+  .counter-buttons-grid {
+    gap: 6px;
+  }
+}
