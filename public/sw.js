@@ -1,4 +1,4 @@
-const CACHE_NAME = "scouting-app-lake-city"; // Increment this version number when you make changes
+const CACHE_NAME = "scouting-app-lake-city-post-lunch"; // Increment this version number when you make changes
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",

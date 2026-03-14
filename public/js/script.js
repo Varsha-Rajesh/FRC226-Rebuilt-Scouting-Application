@@ -2216,8 +2216,8 @@ function saveDataToCSV() {
   }
 
   // Build a separate QR payload that omits the scouter comments field.
-  const qrPayload = fields.slice(0, -1).map(cleanField).join("\t") + '\n';
-  generateQRCode(qrPayload);
+  const qrFields = fields.slice(0, 21).map(cleanField).join("\t") + '\n';
+  generateQRCode(qrFields);
 }
 function generateQRCode(cleanData) {
   const qrContainer = document.getElementById("qrContainer");
