@@ -42,7 +42,7 @@ function encodeFuelCollection(raw) {
     'D': 'D',
     'O': 'E',
     'DO': 'F',
-    "NO:": 'G'
+    "NO": 'G'
   };
   return map[key] || raw;
 }
@@ -153,12 +153,11 @@ allianceOptions.forEach(opt => {
     opt.classList.add('highlight');
 
     setStartPosImageForAlliance(radio.id);
-    setClimbPosImageForAlliance(radio.id); // ADD THIS LINE
+    setClimbPosImageForAlliance(radio.id);   
     updateStartPosOrder(radio.id);
   });
 });
 
-// Add this function with your other image update functions
 const climbPosImage = document.getElementById('climbPosImage');
 
 function setClimbPosImageForAlliance(allianceId) {
@@ -653,7 +652,7 @@ masterAllianceOptions.forEach(opt => {
     lockSetupAlliance(radio.id);
 
     setStartPosImageForAlliance(radio.id);
-    setClimbPosImageForAlliance(radio.id); // ADD THIS LINE
+    setClimbPosImageForAlliance(radio.id);   
     updateStartPosOrder(radio.id);
   });
 });
@@ -665,7 +664,7 @@ function loadSavedAlliance() {
     if (savedOption) {
       const parentOpt = savedOption.closest('.option');
       parentOpt.click();
-      setClimbPosImageForAlliance(savedAlliance); // ADD THIS LINE
+      setClimbPosImageForAlliance(savedAlliance);   
     }
   }
 }
@@ -700,7 +699,7 @@ function lockSetupAlliance(masterId) {
         radio.style.accentColor = '#1e90ff';
       }
       setStartPosImageForAlliance(masterId);
-      setClimbPosImageForAlliance(masterId); // ADD THIS LINE
+      setClimbPosImageForAlliance(masterId);   
       updateStartPosOrder(masterId);
     }
 
@@ -727,7 +726,7 @@ function resetAlliance() {
     opt.querySelector('input').style.accentColor = '#1e90ff';
   });
   if (startPosImage) startPosImage.src = 'images/red_startingPos.png';
-  if (climbPosImage) climbPosImage.src = 'images/red_climb.png'; // ADD THIS LINE
+  if (climbPosImage) climbPosImage.src = 'images/red_climb.png';   
   clearSetupTeamFields();
 }
 
@@ -900,7 +899,6 @@ function setupMatchAutofillListeners() {
     opt.addEventListener('click', autofillTeamNumber);
   });
 
-  // If a match number was already entered (e.g., from saved state), ensure we fill team values.
   if (matchNumberInput && matchNumberInput.value.trim()) {
     autofillTeamNumber();
   }
@@ -2215,7 +2213,6 @@ function saveDataToCSV() {
     localStorage.setItem(csvKey, existing + newRow);
   }
 
-  // Build a separate QR payload that omits the scouter comments field.
   const qrFields = fields.slice(0, 21).map(cleanField).join("\t") + '\n';
   generateQRCode(qrFields);
 }
@@ -2407,7 +2404,7 @@ function toggleRobotMissing() {
     const selectedAlliance = document.querySelector('#setup input[name="alliance"]:checked');
     if (selectedAlliance) {
       setStartPosImageForAlliance(selectedAlliance.id);
-      setClimbPosImageForAlliance(selectedAlliance.id); // ADD THIS LINE
+      setClimbPosImageForAlliance(selectedAlliance.id);   
       updateStartPosOrder(selectedAlliance.id);
     }
     document.querySelectorAll('.field').forEach(field => {
@@ -2562,7 +2559,7 @@ if (setupNextButton) {
       }
     } else {
       if (validateSetupForm()) {
-        goToSection('autonomous');
+        goToSection('match-start');
       }
     }
     return false;
@@ -2659,3 +2656,170 @@ validateSetupForm = function () {
   }
   return originalValidateSetupForm();
 };
+// ========== MATCH START PAGE ==========
+function goToMatchStart() {
+  goToSection('match-start');
+}
+
+function startMatch() {
+  const btn = document.getElementById('matchStartButton');
+  btn.style.transform = 'scale(0.95)';
+  setTimeout(() => {
+    btn.style.transform = '';
+  }, 100);
+  
+  goToSection('autonomous');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.code === 'Space' && document.getElementById('match-start').classList.contains('active')) {
+    e.preventDefault(); 
+    startMatch();
+  }
+});
+
+// ========== AUTONOMOUS TIMER ==========
+let autonomousTimer = null;
+let autonomousTimeLeft = 25;
+let timerFlashInterval = null;
+let isTimerFlashing = false;
+
+function startAutonomousTimer() {
+  stopAutonomousTimer();
+  
+  autonomousTimeLeft = 25;
+  isTimerFlashing = false;
+  
+  createTimerDisplay();
+  
+  updateTimerDisplay();
+  
+  autonomousTimer = setInterval(() => {
+    autonomousTimeLeft -= 1;
+    updateTimerDisplay();
+    
+    if (autonomousTimeLeft <= 0) {
+      stopAutonomousTimer();
+      startTimerFlashing();
+    }
+  }, 1000);
+}
+
+function stopAutonomousTimer() {
+  if (autonomousTimer) {
+    clearInterval(autonomousTimer);
+    autonomousTimer = null;
+  }
+}
+
+function createTimerDisplay() {
+  const existingTimer = document.getElementById('autonomousTimer');
+  if (existingTimer) {
+    existingTimer.remove();
+  }
+  
+  const timerDiv = document.createElement('div');
+  timerDiv.id = 'autonomousTimer';
+  timerDiv.className = 'autonomous-timer';
+  timerDiv.innerHTML = `
+    <div class="timer-label">AUTONOMOUS</div>
+    <div class="timer-value">25s</div>
+  `;
+  
+  document.getElementById('autonomous').appendChild(timerDiv);
+}
+
+function updateTimerDisplay() {
+  const timerValue = document.querySelector('#autonomousTimer .timer-value');
+  const timerBox = document.getElementById('autonomousTimer');
+  
+  if (timerValue && timerBox) {
+    timerValue.textContent = `${autonomousTimeLeft}s`;
+    
+    if (autonomousTimeLeft <= 5 && autonomousTimeLeft > 0) {
+      timerValue.style.color = '#ff6600';
+      timerBox.style.borderColor = '#ff6600';
+    } else if (autonomousTimeLeft <= 10 && autonomousTimeLeft > 5) {
+      timerValue.style.color = '#ffaa00';
+      timerBox.style.borderColor = '#ffaa00';
+    } else {
+      timerValue.style.color = '#1e90ff';
+      timerBox.style.borderColor = '#1e90ff';
+    }
+  }
+}
+function startTimerFlashing() {
+  if (isTimerFlashing) return;
+  
+  isTimerFlashing = true;
+  const timerValue = document.querySelector('#autonomousTimer .timer-value');
+  const timerLabel = document.querySelector('#autonomousTimer .timer-label');
+  
+  if (timerValue) {
+    timerValue.textContent = '0s';
+    timerValue.style.color = '#ff4c4c';
+  }
+  if (timerLabel) {
+    timerLabel.style.color = '#ff4c4c';
+  }
+  
+  // Start screen border flash
+  document.body.classList.add('timer-flashing');
+  
+  timerFlashInterval = setInterval(() => {
+    document.body.classList.toggle('timer-flash-active');
+  }, 500);
+}
+
+function stopTimerFlashing() {
+  if (timerFlashInterval) {
+    clearInterval(timerFlashInterval);
+    timerFlashInterval = null;
+  }
+  
+  isTimerFlashing = false;
+  document.body.classList.remove('timer-flashing', 'timer-flash-active');
+}
+
+function startMatch() {
+  const btn = document.getElementById('matchStartButton');
+  btn.style.transform = 'scale(0.95)';
+  setTimeout(() => {
+    btn.style.transform = '';
+  }, 100);
+  
+  // Navigate to autonomous page
+  goToSection('autonomous');
+  
+  // Start the autonomous timer
+  startAutonomousTimer();
+}
+
+// Add cleanup when leaving autonomous page
+window.goToSection = function(sectionId) {
+  // Stop timer and flashing when leaving autonomous page
+  if (sectionId !== 'autonomous') {
+    stopAutonomousTimer();
+    stopTimerFlashing();
+    
+    // Remove timer display
+    const timer = document.getElementById('autonomousTimer');
+    if (timer) {
+      timer.remove();
+    }
+  }
+  
+  originalGoToSection(sectionId);
+  
+  if (sectionId === 'teleop') {
+    updateStuckBarState();
+  }
+};
+
+// Add keyboard shortcut to stop flashing (useful for testing)
+document.addEventListener('keydown', function(e) {
+  if (e.code === 'KeyS' && e.ctrlKey && document.getElementById('autonomous').classList.contains('active')) {
+    e.preventDefault();
+    stopTimerFlashing();
+  }
+});
