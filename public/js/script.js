@@ -2763,12 +2763,58 @@ function startTimerFlashing() {
     timerLabel.style.color = '#ff4c4c';
   }
   
-  // Start screen border flash
   document.body.classList.add('timer-flashing');
   
   timerFlashInterval = setInterval(() => {
     document.body.classList.toggle('timer-flash-active');
   }, 500);
+}
+
+let vibrationInterval = null;
+
+function startTimerFlashing() {
+  if (isTimerFlashing) return;
+  
+  isTimerFlashing = true;
+  const timerDiv = document.getElementById('autonomousTimer');
+  const timerValue = document.querySelector('#autonomousTimer .timer-value');
+  const timerLabel = document.querySelector('#autonomousTimer .timer-label');
+  
+  if (timerValue) {
+    timerValue.textContent = '0s';
+    timerValue.style.color = '#ff4c4c';
+  }
+  if (timerLabel) {
+    timerLabel.style.color = '#ff4c4c';
+  }
+  
+  if (timerDiv) {
+    timerDiv.classList.add('aggressive-timer');
+  }
+  
+  document.body.classList.add('timer-flashing-aggressive');
+  
+  timerFlashInterval = setInterval(() => {
+    document.body.classList.toggle('timer-flash-active');
+  }, 120);
+  
+  if ('vibrate' in navigator) {
+    function startVibrationPattern() {
+      if (!isTimerFlashing) return;
+      
+      navigator.vibrate([80, 50, 150, 50, 80]);
+      
+      vibrationInterval = setTimeout(() => {
+        if (isTimerFlashing) {
+          startVibrationPattern();
+        }
+      }, 400); 
+    }
+    
+    startVibrationPattern();
+  } else {
+    console.log("Vibration API not supported on this device");
+  }
 }
 
 function stopTimerFlashing() {
@@ -2777,32 +2823,115 @@ function stopTimerFlashing() {
     timerFlashInterval = null;
   }
   
+  if (vibrationInterval) {
+    clearTimeout(vibrationInterval);
+    vibrationInterval = null;
+  }
+  
+  if ('vibrate' in navigator) {
+    navigator.vibrate(0); 
+  }
+  
   isTimerFlashing = false;
-  document.body.classList.remove('timer-flashing', 'timer-flash-active');
+  document.body.classList.remove('timer-flashing-aggressive', 'timer-flash-active');
+  
+  const timerDiv = document.getElementById('autonomousTimer');
+  if (timerDiv) {
+    timerDiv.classList.remove('aggressive-timer');
+    const timerValue = timerDiv.querySelector('.timer-value');
+    const timerLabel = timerDiv.querySelector('.timer-label');
+    if (timerValue) timerValue.style.color = '';
+    if (timerLabel) timerLabel.style.color = '';
+  }
+  
+  document.body.style.backgroundColor = '';
 }
 
-function startMatch() {
-  const btn = document.getElementById('matchStartButton');
-  btn.style.transform = 'scale(0.95)';
-  setTimeout(() => {
-    btn.style.transform = '';
-  }, 100);
+function startAutonomousTimer() {
+  stopAutonomousTimer();
+  stopTimerFlashing(); 
   
-  // Navigate to autonomous page
-  goToSection('autonomous');
+  autonomousTimeLeft = 25;
+  isTimerFlashing = false;
   
-  // Start the autonomous timer
-  startAutonomousTimer();
+  createTimerDisplay();
+  updateTimerDisplay();
+  
+  autonomousTimer = setInterval(() => {
+    autonomousTimeLeft -= 1;
+    updateTimerDisplay();
+    
+    if (autonomousTimeLeft <= 0) {
+      stopAutonomousTimer();
+      startTimerFlashing(); 
+    }
+  }, 1000);
 }
 
-// Add cleanup when leaving autonomous page
+const originalGoToSectionForTimer = window.goToSection;
 window.goToSection = function(sectionId) {
-  // Stop timer and flashing when leaving autonomous page
   if (sectionId !== 'autonomous') {
     stopAutonomousTimer();
     stopTimerFlashing();
     
-    // Remove timer display
+    const timer = document.getElementById('autonomousTimer');
+    if (timer) {
+      timer.remove();
+    }
+  }
+  
+  if (typeof originalGoToSectionForTimer === 'function') {
+    originalGoToSectionForTimer(sectionId);
+  } else {
+    document.querySelectorAll('.section').forEach(section => {
+      section.classList.remove('active');
+    });
+    document.getElementById(sectionId).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+  
+  if (sectionId === 'teleop') {
+    if (typeof updateStuckBarState === 'function') updateStuckBarState();
+  }
+};
+
+const originalStartMatch = window.startMatch;
+window.startMatch = function() {
+  stopTimerFlashing();
+  
+  const btn = document.getElementById('matchStartButton');
+  if (btn) {
+    btn.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      if (btn) btn.style.transform = '';
+    }, 100);
+  }
+  
+  goToSection('autonomous');
+  startAutonomousTimer();
+};
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.altKey && e.code === 'KeyS') {
+    e.preventDefault();
+    if (document.getElementById('autonomous').classList.contains('active')) {
+      stopTimerFlashing();
+      console.log("Flashing stopped manually");
+    }
+  }
+});
+
+window.addEventListener('beforeunload', function() {
+  if ('vibrate' in navigator) {
+    navigator.vibrate(0);
+  }
+});
+
+window.goToSection = function(sectionId) {
+  if (sectionId !== 'autonomous') {
+    stopAutonomousTimer();
+    stopTimerFlashing();
+    
     const timer = document.getElementById('autonomousTimer');
     if (timer) {
       timer.remove();
@@ -2816,7 +2945,6 @@ window.goToSection = function(sectionId) {
   }
 };
 
-// Add keyboard shortcut to stop flashing (useful for testing)
 document.addEventListener('keydown', function(e) {
   if (e.code === 'KeyS' && e.ctrlKey && document.getElementById('autonomous').classList.contains('active')) {
     e.preventDefault();
