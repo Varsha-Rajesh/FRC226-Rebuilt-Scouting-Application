@@ -1,4 +1,4 @@
-const CACHE_NAME = "scouting-app-troy-v2"; 
+const CACHE_NAME = "scouting-app-testing-v1"; 
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",

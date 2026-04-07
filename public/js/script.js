@@ -166,6 +166,10 @@ allianceOptions.forEach(opt => {
     setStartPosImageForAlliance(radio.id);
     setClimbPosImageForAlliance(radio.id);
     updateStartPosOrder(radio.id);
+    updateMatchStartButtonColor();
+    updateTopStatusBar();
+
+
   });
 });
 
@@ -665,6 +669,8 @@ masterAllianceOptions.forEach(opt => {
     setStartPosImageForAlliance(radio.id);
     setClimbPosImageForAlliance(radio.id);
     updateStartPosOrder(radio.id);
+    updateMatchStartButtonColor();
+    updateTopStatusBar();
   });
 });
 
@@ -678,6 +684,7 @@ function loadSavedAlliance() {
       setClimbPosImageForAlliance(savedAlliance);
     }
   }
+  updateTopStatusBar();
 }
 
 loadSavedAlliance();
@@ -739,6 +746,8 @@ function resetAlliance() {
   if (startPosImage) startPosImage.src = 'images/red_startingPos.png';
   if (climbPosImage) climbPosImage.src = 'images/red_climb.png';
   clearSetupTeamFields();
+  updateTopStatusBar();
+
 }
 
 
@@ -899,6 +908,8 @@ function autofillTeamNumber() {
     teamNumberInput.value = '';
     teamNameInput.value = '';
   }
+  updateTopStatusBar();
+
 }
 function setupMatchAutofillListeners() {
   const matchNumberInput = document.getElementById('matchNumber');
@@ -916,6 +927,10 @@ function setupMatchAutofillListeners() {
 }
 
 document.addEventListener('DOMContentLoaded', setupMatchAutofillListeners);
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateTopStatusBar();
+});
 
 function autofillTeamName() {
   const teamNumberInput = document.getElementById('teamNumber');
@@ -1428,6 +1443,9 @@ document.querySelectorAll('#setup input[type="radio"][name="startPos"]').forEach
   });
 });
 
+document.getElementById('teamNumber').addEventListener('input', function () {
+  updateTopStatusBar();
+});
 // ========== FORM VALIDATION ==========
 function clearTeleopValidationHighlights() {
   const stuckBarField = document.querySelector('#teleop .field:nth-of-type(1)');
@@ -2138,7 +2156,7 @@ function saveDataToCSV() {
     autoFuelFerried = document.getElementById("autoFuelFerriedInput")?.value || '0';
     teleFuelCollected = document.getElementById("teleFuelCollectedInput")?.value || '0';
     teleFuelFerried = document.getElementById("teleFuelFerriedInput")?.value || '0';
-    
+
     const climbAutoRaw = getCheckedValue("climb-auto");
     const climbAutoMap = { 'Level 1': '1', 'Failed': 'F', 'None': '0' };
     climbAuto = climbAutoMap[climbAutoRaw] || '-';
@@ -2671,6 +2689,75 @@ validateSetupForm = function () {
   return originalValidateSetupForm();
 };
 // ========== MATCH START PAGE ==========
+
+function updateMatchStartButtonColor() {
+  const startButton = document.getElementById('matchStartButton');
+  if (!startButton) return;
+
+  const selectedAlliance = document.querySelector('#setup input[name="alliance"]:checked');
+  if (!selectedAlliance) return;
+
+  startButton.classList.remove('alliance-red', 'alliance-blue');
+
+  if (selectedAlliance.id.startsWith('R')) {
+    startButton.classList.add('alliance-red');
+  } else if (selectedAlliance.id.startsWith('B')) {
+    startButton.classList.add('alliance-blue');
+  }
+}
+
+function updateTopStatusBar() {
+  const allianceRadio = document.querySelector('#setup input[name="alliance"]:checked');
+  const allianceValue = document.getElementById('statusAlliance');
+  const teamValue = document.getElementById('statusTeam');
+  const startPosValue = document.getElementById('statusStartPos');
+  
+  let allianceColor = '';
+  
+  if (allianceRadio) {
+    let allianceText = allianceRadio.id; 
+    allianceValue.textContent = allianceText;
+    
+    if (allianceRadio.id.startsWith('R')) {
+      allianceColor = 'alliance-red';
+      allianceValue.classList.remove('alliance-blue');
+      allianceValue.classList.add('alliance-red');
+    } else {
+      allianceColor = 'alliance-blue';
+      allianceValue.classList.remove('alliance-red');
+      allianceValue.classList.add('alliance-blue');
+    }
+  } else {
+    allianceValue.textContent = '—';
+    allianceValue.classList.remove('alliance-red', 'alliance-blue');
+    allianceColor = '';
+  }
+  
+  const teamNumber = document.getElementById('teamNumber').value.trim();
+  teamValue.textContent = teamNumber || '—';
+  teamValue.classList.remove('alliance-red', 'alliance-blue');
+  if (allianceColor) {
+    teamValue.classList.add(allianceColor);
+  }
+  
+  const startPosRadio = document.querySelector('#setup input[name="startPos"]:checked');
+  if (startPosRadio) {
+    const startMap = {
+      'outpost': 'Outpost',
+      'center': 'Center',
+      'depot': 'Depot'
+    };
+    let startText = startMap[startPosRadio.id] || startPosRadio.id;
+    startText = startText.charAt(0).toUpperCase() + startText.slice(1);
+    startPosValue.textContent = startText;
+  } else {
+    startPosValue.textContent = '—';
+  }
+  startPosValue.classList.remove('alliance-red', 'alliance-blue');
+  if (allianceColor) {
+    startPosValue.classList.add(allianceColor);
+  }
+}
 function goToMatchStart() {
   goToSection('match-start');
 }
@@ -2958,6 +3045,9 @@ window.goToSection = function (sectionId) {
     updateStuckBarState();
   }
 };
+if (sectionId === 'match-start') {
+  updateMatchStartButtonColor();
+}
 
 document.addEventListener('keydown', function (e) {
   if (e.code === 'KeyS' && e.ctrlKey && document.getElementById('autonomous').classList.contains('active')) {

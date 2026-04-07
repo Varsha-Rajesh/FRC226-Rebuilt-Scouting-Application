@@ -15,7 +15,7 @@
     <section id="setup" class="section active">
       <img src="images/menu.png" alt="Menu" id="masterMenuBtn" class="setup-menu-icon" />
       <h1>Set Up</h1>
-      <h5 style="color: lightgray; text-align: center; width: 100%; margin: -20px 0 20px 0;">Troy Scouting</h5>
+      <h5 style="color: lightgray; text-align: center; width: 100%; margin: -20px 0 20px 0;">Tester V1</h5>
       <div class="field">
         <label for="matchNumber">Match Number</label>
         <input type="number" id="matchNumber" placeholder="Enter match #" />
@@ -113,7 +113,18 @@
     <!-- ========== MATCH START PAGE ========== -->
     <section id="match-start" class="section">
       <h1>Ready to Scout</h1>
-
+      <div class="top-status-bar" id="topStatusBar">
+        <div class="status-labels">
+          <div class="status-label">ALLIANCE</div>
+          <div class="status-label">TEAM NUMBER</div>
+          <div class="status-label">STARTING POSITION</div>
+        </div>
+        <div class="status-values">
+          <div class="status-value" id="statusAlliance">—</div>
+          <div class="status-value" id="statusTeam">—</div>
+          <div class="status-value" id="statusStartPos">—</div>
+        </div>
+      </div>
       <div class="match-start-container">
         <div class="start-button-container">
           <button id="matchStartButton" class="match-start-btn" onclick="startMatch()">
