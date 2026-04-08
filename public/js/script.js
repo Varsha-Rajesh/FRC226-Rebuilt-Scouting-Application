@@ -1390,6 +1390,32 @@ function validateSetupForm() {
   return isValid;
 }
 
+function getFirstInvalidSetupField() {
+  const orderedFields = [
+    { id: 'matchNumber', type: 'input' },
+    { id: 'scouterName', type: 'input' },
+    { id: 'teamNumber', type: 'input' },
+    { id: 'alliance', type: 'radio', container: '.alliance-options' },
+    { id: 'startPos', type: 'radio', container: '.start-options' }
+  ];
+
+  for (const field of orderedFields) {
+    if (field.type === 'input') {
+      const input = document.getElementById(field.id);
+      if (input && !input.value.trim()) {
+        return input;
+      }
+    } else if (field.type === 'radio') {
+      const selected = document.querySelector(`#setup input[name="${field.id}"]:checked`);
+      if (!selected) {
+        const container = document.querySelector(`#setup ${field.container}`);
+        return container ? container.parentElement : null;
+      }
+    }
+  }
+
+  return null;
+}
 
 function clearValidationHighlightForField(fieldNameOrElement) {
   let field = fieldNameOrElement;
@@ -1593,11 +1619,43 @@ function validateTeleopForm() {
     climbPosField.style.borderRadius = '';
   }
 
+  if (!isValid) {
+    const invalidField = getFirstInvalidTeleopField();
+    if (invalidField) {
+      invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
   stuckBarRadios.forEach(rb => rb.addEventListener('change', clearTeleopValidationHighlights));
   climbRadios.forEach(rb => rb.addEventListener('change', clearTeleopValidationHighlights));
   climbPosRadios.forEach(rb => rb.addEventListener('change', clearTeleopValidationHighlights));
 
   return isValid;
+}
+
+function getFirstInvalidTeleopField() {
+  const stuckBarRadios = document.querySelectorAll('#teleop input[name="stuckBar"]');
+  const stuckBarEnabled = Array.from(stuckBarRadios).some(rb => !rb.disabled);
+  const stuckBarSelected = Array.from(stuckBarRadios).some(rb => rb.checked);
+  if (stuckBarEnabled && !stuckBarSelected) {
+    return document.querySelector('#teleop .field:nth-of-type(1)');
+  }
+
+  const climbRadios = document.querySelectorAll('#teleop input[name="climb-teleop"]');
+  const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
+  if (!climbSelected) {
+    return document.querySelector('#teleop .field:nth-of-type(4)');
+  }
+
+  const climbTeleopSelected = document.querySelector('#teleop input[name="climb-teleop"]:checked');
+  const climbTeleopLabel = climbTeleopSelected?.nextElementSibling?.textContent?.trim() || '';
+  const climbPosRadios2 = document.querySelectorAll('#teleop input[name="climbPos"]');
+  const climbPosSelected = Array.from(climbPosRadios2).some(rb => rb.checked);
+  if (climbTeleopLabel !== 'None' && !climbPosSelected) {
+    return document.querySelector('#teleop .field:nth-of-type(6)');
+  }
+
+  return null;
 }
 
 function validateEndcardsForm() {
@@ -1737,7 +1795,53 @@ function validateEndcardsForm() {
     }
   }
 
+  if (!isValid) {
+    const invalidField = getFirstInvalidEndcardsField();
+    if (invalidField) {
+      invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
   return isValid;
+}
+
+function getFirstInvalidEndcardsField() {
+  const shootingSelected = Array.from(document.querySelectorAll('#endcards input[name="shootingAccuracy"]')).some(rb => rb.checked);
+  if (!shootingSelected) {
+    return document.querySelector('#endcards .field:nth-of-type(1)');
+  }
+
+  const defenseSelected = Array.from(document.querySelectorAll('#endcards input[name="defenseOn"]')).some(rb => rb.checked);
+  if (!defenseSelected) {
+    return document.querySelector('#endcards .field:nth-of-type(2)');
+  }
+
+  const robotDefenseSelected = Array.from(document.querySelectorAll('#endcards input[name="robotDefense"]')).some(rb => rb.checked);
+  if (!robotDefenseSelected) {
+    return document.querySelector('#endcards .field:nth-of-type(3)');
+  }
+
+  const driverSkillSelected = Array.from(document.querySelectorAll('#endcards input[name="driverSkill"]')).some(rb => rb.checked);
+  if (!driverSkillSelected) {
+    return document.querySelector('#endcards .field:nth-of-type(4)');
+  }
+
+  const diedSelected = Array.from(document.querySelectorAll('#endcards input[name="died"]')).some(rb => rb.checked);
+  if (!diedSelected) {
+    return document.querySelector('#endcards .field:nth-of-type(5)');
+  }
+
+  const tippySelected = Array.from(document.querySelectorAll('#endcards input[name="tippy"]')).some(rb => rb.checked);
+  if (!tippySelected) {
+    return document.querySelector('#endcards .field:nth-of-type(6)');
+  }
+
+  const comments = document.getElementById('comments').value.trim();
+  if (!comments) {
+    return document.querySelector('#endcards .field:nth-of-type(7)');
+  }
+
+  return null;
 }
 
 function clearEndcardsValidationHighlights() {
@@ -1827,7 +1931,36 @@ function validateAutonomousForm() {
     climbField.style.borderRadius = '';
   }
 
+  if (!isValid) {
+    const invalidField = getFirstInvalidAutonomousField();
+    if (invalidField) {
+      invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
   return isValid;
+}
+
+function getFirstInvalidAutonomousField() {
+  const fuelCheckboxes = document.querySelectorAll('#autonomous .fuel-option input, #autonomous .fuel-none input');
+  const fuelSelected = Array.from(fuelCheckboxes).some(cb => cb.checked);
+  if (!fuelSelected) {
+    return document.querySelector('#autonomous .field:nth-of-type(3)');
+  }
+
+  const travelCheckboxes = document.querySelectorAll('#autonomous .travel-option input, #autonomous .travel-na input');
+  const travelSelected = Array.from(travelCheckboxes).some(cb => cb.checked);
+  if (!travelSelected) {
+    return document.querySelector('#autonomous .field:nth-of-type(4)');
+  }
+
+  const climbRadios = document.querySelectorAll('#autonomous .climb-option input');
+  const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
+  if (!climbSelected) {
+    return document.querySelector('#autonomous .field:nth-of-type(5)');
+  }
+
+  return null;
 }
 
 function clearAutonomousValidationHighlights() {
@@ -2592,6 +2725,11 @@ if (setupNextButton) {
     } else {
       if (validateSetupForm()) {
         goToSection('match-start');
+      } else {
+        const invalidTarget = getFirstInvalidSetupField();
+        if (invalidTarget) {
+          invalidTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
     }
     return false;
@@ -2849,27 +2987,6 @@ function updateTimerDisplay() {
     }
   }
 }
-function startTimerFlashing() {
-  if (isTimerFlashing) return;
-
-  isTimerFlashing = true;
-  const timerValue = document.querySelector('#autonomousTimer .timer-value');
-  const timerLabel = document.querySelector('#autonomousTimer .timer-label');
-
-  if (timerValue) {
-    timerValue.textContent = '0s';
-    timerValue.style.color = '#ff4c4c';
-  }
-  if (timerLabel) {
-    timerLabel.style.color = '#ff4c4c';
-  }
-
-  document.body.classList.add('timer-flashing');
-
-  timerFlashInterval = setInterval(() => {
-    document.body.classList.toggle('timer-flash-active');
-  }, 500);
-}
 
 let vibrationInterval = null;
 
@@ -2897,19 +3014,19 @@ function startTimerFlashing() {
 
   timerFlashInterval = setInterval(() => {
     document.body.classList.toggle('timer-flash-active');
-  }, 120);
+  }, 300);
 
   if ('vibrate' in navigator) {
     function startVibrationPattern() {
       if (!isTimerFlashing) return;
 
-      navigator.vibrate([80, 50, 150, 50, 80]);
+      navigator.vibrate([60, 100, 80, 100, 60]);
 
       vibrationInterval = setTimeout(() => {
         if (isTimerFlashing) {
           startVibrationPattern();
         }
-      }, 400);
+      }, 600);
     }
 
     startVibrationPattern();
