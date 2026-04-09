@@ -4,6 +4,189 @@ function goToSection(sectionId) {
   });
   document.getElementById(sectionId).classList.add('active');
   window.scrollTo(0, 0);
+  const activeSection = document.querySelector('.section.active');
+  if (activeSection) {
+    localStorage.setItem('scoutingAppActiveSection', activeSection.id);
+  }
+}
+
+const APP_STATE_KEY = 'scoutingAppFormState';
+const APP_SECTION_KEY = 'scoutingAppActiveSection';
+
+function getPersistKey(el) {
+  if (el.id) return el.id;
+  if (el.name) return `${el.name}:${el.type}`;
+  return null;
+}
+
+function saveAppState() {
+  try {
+    const data = {};
+    document.querySelectorAll('#setup input, #autonomous input, #teleop input, #endcards input, #setup textarea, #endcards textarea, #setup select, #endcards select').forEach(el => {
+      const key = getPersistKey(el);
+      if (!key) return;
+
+      if (el.type === 'radio') {
+        if (el.checked) {
+          data[key] = el.value;
+        }
+      } else if (el.type === 'checkbox') {
+        data[key] = el.checked;
+      } else {
+        data[key] = el.value;
+      }
+    });
+
+    localStorage.setItem(APP_STATE_KEY, JSON.stringify(data));
+    const activeSection = document.querySelector('.section.active');
+    if (activeSection) {
+      localStorage.setItem(APP_SECTION_KEY, activeSection.id);
+    }
+  } catch (err) {
+    console.warn('Unable to save app state:', err);
+  }
+}
+
+function restoreAppState() {
+  try {
+    const raw = localStorage.getItem(APP_STATE_KEY);
+    if (!raw) return;
+
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== 'object') return;
+
+    document.querySelectorAll('#setup input, #autonomous input, #teleop input, #endcards input, #setup textarea, #endcards textarea, #setup select, #endcards select').forEach(el => {
+      const key = getPersistKey(el);
+      if (!key || !(key in data)) return;
+
+      if (el.type === 'radio') {
+        el.checked = data[key] === el.value;
+      } else if (el.type === 'checkbox') {
+        el.checked = !!data[key];
+      } else {
+        el.value = data[key];
+      }
+
+      if (el.id && el.id.endsWith('Input')) {
+        const display = document.getElementById(el.id.slice(0, -5));
+        if (display && !['INPUT', 'TEXTAREA', 'SELECT'].includes(display.tagName)) {
+          display.textContent = data[key];
+        }
+      }
+    });
+
+    refreshPersistentHighlights();
+
+    const sectionId = localStorage.getItem(APP_SECTION_KEY);
+    if (sectionId && document.getElementById(sectionId)) {
+      goToSection(sectionId);
+    }
+  } catch (err) {
+    console.warn('Unable to restore app state:', err);
+  }
+}
+
+function clearAppState() {
+  localStorage.removeItem(APP_STATE_KEY);
+  localStorage.removeItem(APP_SECTION_KEY);
+}
+
+function refreshPersistentHighlights() {
+  document.querySelectorAll('#setup .alliance-options .option').forEach(opt => {
+    const input = opt.querySelector('input');
+    if (input) {
+      opt.classList.toggle('highlight', input.checked);
+      if (input.id?.startsWith('R')) {
+        opt.classList.toggle('red', input.checked);
+        if (input.checked) input.style.accentColor = '#ff4c4c';
+      } else if (input.checked) {
+        opt.classList.add('blue');
+      }
+    }
+  });
+
+  document.querySelectorAll('#setup .start-options .option').forEach(opt => {
+    const input = opt.querySelector('input');
+    if (input) {
+      opt.classList.toggle('highlight', input.checked);
+    }
+  });
+
+  document.querySelectorAll('#autonomous .fuel-option').forEach(opt => {
+    const input = opt.querySelector('input');
+    if (input) opt.classList.toggle('highlight', input.checked);
+  });
+
+  const fuelNoneCheckbox = document.querySelector('#autonomous .fuel-none input');
+  const fuelNone = document.querySelector('#autonomous .fuel-none');
+  if (fuelNoneCheckbox && fuelNone) {
+    fuelNone.classList.toggle('highlight', fuelNoneCheckbox.checked);
+    document.querySelectorAll('#autonomous .fuel-option').forEach(opt => {
+      opt.classList.toggle('disabled', fuelNoneCheckbox.checked);
+    });
+  }
+
+  document.querySelectorAll('#autonomous .travel-option').forEach(opt => {
+    const input = opt.querySelector('input');
+    if (input) opt.classList.toggle('highlight', input.checked);
+  });
+
+  const travelNACheckbox = document.querySelector('#autonomous .travel-na input');
+  const travelNAOption = document.querySelector('#autonomous .travel-na');
+  if (travelNACheckbox && travelNAOption) {
+    travelNAOption.classList.toggle('highlight', travelNACheckbox.checked);
+    document.querySelectorAll('#autonomous .travel-option').forEach(opt => {
+      opt.classList.toggle('disabled', travelNACheckbox.checked);
+    });
+  }
+
+  document.querySelectorAll('#autonomous .climb-option').forEach(opt => {
+    const input = opt.querySelector('input');
+    if (input) opt.classList.toggle('highlight', input.checked);
+  });
+
+  document.querySelectorAll('#teleop .climb-option, #teleop .climb-pos, #teleop .stuck-bar-option, #endcards .option').forEach(opt => {
+    const input = opt.querySelector('input');
+    if (input) opt.classList.toggle('highlight', input.checked);
+  });
+
+  document.querySelectorAll('#endcards .option').forEach(opt => {
+    const input = opt.querySelector('input');
+    if (input) opt.classList.toggle('highlight', input.checked);
+  });
+
+  const selectedAlliance = document.querySelector('#setup input[name="alliance"]:checked');
+  if (selectedAlliance) {
+    setStartPosImageForAlliance(selectedAlliance.id);
+    setClimbPosImageForAlliance(selectedAlliance.id);
+    setFuelCollectionImageForAlliance(selectedAlliance.id);
+    updateStartPosOrder(selectedAlliance.id);
+  }
+
+  updateMatchStartButtonColor();
+  updateTopStatusBar();
+}
+
+function setupAppPersistence() {
+  document.addEventListener('input', event => {
+    if (event.target.closest('#setup, #autonomous, #teleop, #endcards')) {
+      saveAppState();
+    }
+  });
+
+  document.addEventListener('change', event => {
+    if (event.target.closest('#setup, #autonomous, #teleop, #endcards')) {
+      saveAppState();
+    }
+  });
+
+  document.addEventListener('click', event => {
+    if (event.target.closest('#setup, #autonomous, #teleop, #endcards')) {
+      setTimeout(saveAppState, 0);
+    }
+  });
+
+  window.addEventListener('beforeunload', saveAppState);
 }
 
 function adjustCounter(valueId, delta) {
@@ -1030,6 +1213,11 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  restoreAppState();
+  setupAppPersistence();
+});
+
 function deleteMatchSchedule() {
   if (!localStorage.getItem('matchScheduleCSV')) {
     alert("No CSV uploaded.");
@@ -1258,6 +1446,7 @@ function resetFormForNewEntry() {
       }
     }
   }
+  clearAppState();
 }
 const setupOptions = document.querySelectorAll('#setup .alliance-options .option');
 const allianceLocked = Array.from(setupOptions).some(opt => opt.classList.contains('disabled'));

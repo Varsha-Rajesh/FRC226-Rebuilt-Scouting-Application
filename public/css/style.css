@@ -1082,7 +1082,7 @@ body.timer-flashing-aggressive::before {
   border: 8px solid;
   border-radius: 0;
   z-index: 9999;
-  animation: aggressiveFlashBorder 0.25s infinite alternate;
+  animation: aggressiveFlashBorder 0.8s infinite alternate;
   background: radial-gradient(circle at center, rgba(255, 0, 0, 0.15) 0%, rgba(255, 0, 0, 0) 80%);
   transition: none;
 }
@@ -1093,7 +1093,7 @@ body.timer-flashing-aggressive {
 }
 
 #autonomousTimer.aggressive-timer {
-  animation: timerExtremePulse 0.4s infinite alternate;
+  animation: timerExtremePulse 0.8s infinite alternate;
   border-width: 4px;
   background: rgba(0, 0, 0, 0.98);
   transform-origin: center;
