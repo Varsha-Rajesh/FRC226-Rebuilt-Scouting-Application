@@ -1050,24 +1050,16 @@ body.timer-flashing.timer-flash-active > *:not(#autonomousTimer) {
 
 @keyframes aggressiveFlashBorder {
   0% {
-    border-color: rgba(255, 50, 50, 0.2);
-    box-shadow: inset 0 0 0px rgba(255, 0, 0, 0);
-  }
-  25% {
-    border-color: #ff0000;
-    box-shadow: inset 0 0 25px rgba(255, 0, 0, 0.6), 0 0 15px rgba(255, 0, 0, 0.5);
+    border-color: rgb(179, 0, 0);
+    box-shadow: inset 0 0 0 rgba(255, 0, 0, 0);
   }
   50% {
-    border-color: #ff6600;
-    box-shadow: inset 0 0 35px rgba(255, 102, 0, 0.7), 0 0 22px rgba(255, 102, 0, 0.6);
-  }
-  75% {
-    border-color: #ff0000;
-    box-shadow: inset 0 0 25px rgba(255, 0, 0, 0.6), 0 0 15px rgba(255, 0, 0, 0.5);
+    border-color: rgb(151, 4, 4);
+    box-shadow: inset 0 0 18px rgba(255, 0, 0, 0.12), 0 0 10px rgba(255, 0, 0, 0.08);
   }
   100% {
-    border-color: rgba(255, 50, 50, 0.2);
-    box-shadow: inset 0 0 0px rgba(255, 0, 0, 0);
+    border-color: rgb(73, 0, 0);
+    box-shadow: inset 0 0 0 rgba(255, 0, 0, 0);
   }
 }
 
@@ -1079,38 +1071,37 @@ body.timer-flashing-aggressive::before {
   right: 0;
   bottom: 0;
   pointer-events: none;
-  border: 8px solid;
+  border: 6px solid;
   border-radius: 0;
   z-index: 9999;
-  animation: aggressiveFlashBorder 0.8s infinite alternate;
-  background: radial-gradient(circle at center, rgba(255, 0, 0, 0.15) 0%, rgba(255, 0, 0, 0) 80%);
-  transition: none;
+  animation: aggressiveFlashBorder 2.5s infinite ease-in-out;
+  background: radial-gradient(circle at center, rgba(255, 0, 0, 0.08) 0%, rgba(255, 0, 0, 0) 80%);
 }
 
 body.timer-flashing-aggressive {
-  background-color: #1a0000 !important;
-  transition: background-color 0.05s ease;
+  background-color: rgba(26, 0, 0, 0.35) !important;
+  transition: background-color 0.2s ease;
 }
 
 #autonomousTimer.aggressive-timer {
-  animation: timerExtremePulse 0.8s infinite alternate;
-  border-width: 4px;
-  background: rgba(0, 0, 0, 0.98);
+  animation: timerExtremePulse 2.5s infinite ease-in-out;
+  border-width: 3px;
+  background: rgba(0, 0, 0, 0.92);
   transform-origin: center;
 }
 
 @keyframes timerExtremePulse {
   0% {
-    border-color: #ff4c4c;
+    border-color: #ff7f7f;
     transform: scale(1);
-    background: #440000;
-    box-shadow: 0 0 6px rgba(255, 0, 0, 0.5);
+    background: #3a0000;
+    box-shadow: 0 0 4px rgba(255, 0, 0, 0.22);
   }
   100% {
-    border-color: #ffaa00;
-    transform: scale(1.02);
-    background: #8b0000;
-    box-shadow: 0 0 15px rgba(255, 68, 0, 0.6);
+    border-color: #ffb68a;
+    transform: scale(1.01);
+    background: #5c0000;
+    box-shadow: 0 0 8px rgba(255, 68, 0, 0.24);
   }
 }
 
