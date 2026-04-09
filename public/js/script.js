@@ -15,7 +15,12 @@ const APP_SECTION_KEY = 'scoutingAppActiveSection';
 
 function getPersistKey(el) {
   if (el.id) return el.id;
-  if (el.name) return `${el.name}:${el.type}`;
+  if (el.name) {
+    if (el.type === 'radio') {
+      return `radio:${el.name}`;
+    }
+    return `${el.name}:${el.type}`;
+  }
   return null;
 }
 
@@ -28,7 +33,7 @@ function saveAppState() {
 
       if (el.type === 'radio') {
         if (el.checked) {
-          data[key] = el.value;
+          data[key] = el.value || el.nextElementSibling?.textContent?.trim() || 'on';
         }
       } else if (el.type === 'checkbox') {
         data[key] = el.checked;
@@ -60,7 +65,9 @@ function restoreAppState() {
       if (!key || !(key in data)) return;
 
       if (el.type === 'radio') {
-        el.checked = data[key] === el.value;
+        const storedValue = data[key];
+        const radioValue = el.value || el.nextElementSibling?.textContent?.trim() || '';
+        el.checked = (storedValue === radioValue);
       } else if (el.type === 'checkbox') {
         el.checked = !!data[key];
       } else {
@@ -75,6 +82,12 @@ function restoreAppState() {
       }
     });
 
+    document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+      const event = new Event('change', { bubbles: true });
+      radio.dispatchEvent(event);
+    });
+
+    updateRadioHighlights();
     refreshPersistentHighlights();
 
     const sectionId = localStorage.getItem(APP_SECTION_KEY);
@@ -86,6 +99,25 @@ function restoreAppState() {
   }
 }
 
+function updateRadioHighlights() {
+  document.querySelectorAll('#autonomous .climb-option').forEach(opt => {
+    const input = opt.querySelector('input');
+    if (input && input.checked) {
+      opt.classList.add('highlight');
+    } else if (input) {
+      opt.classList.remove('highlight');
+    }
+  });
+
+  document.querySelectorAll('#teleop .climb-option, #teleop .climb-pos').forEach(opt => {
+    const input = opt.querySelector('input');
+    if (input && input.checked) {
+      opt.classList.add('highlight');
+    } else if (input) {
+      opt.classList.remove('highlight');
+    }
+  });
+}
 function clearAppState() {
   localStorage.removeItem(APP_STATE_KEY);
   localStorage.removeItem(APP_SECTION_KEY);
@@ -1245,7 +1277,6 @@ function deleteMatchSchedule() {
   }
 }
 
-
 let teamList = [];
 
 function updateTeamCSVStatus(message, success) {
@@ -1685,7 +1716,7 @@ function clearTeleopValidationHighlights() {
     climbField.style.borderRadius = '';
   }
 
-  const climbPosField = document.querySelector('#teleop .field:nth-of-type(5)');
+  const climbPosField = document.querySelector('#teleop .field:nth-of-type(6)');
   const climbPosRadios = document.querySelectorAll('#teleop input[name="climbPos"]');
   const climbPosSelected = Array.from(climbPosRadios).some(rb => rb.checked);
   const climbTeleopSelected = document.querySelector('#teleop input[name="climb-teleop"]:checked');
@@ -1698,52 +1729,125 @@ function clearTeleopValidationHighlights() {
     climbPosField.style.borderRadius = '';
   }
 }
-function clearTeleopValidationHighlights() {
+
+function validateTeleopForm() {
+  let isValid = true;
+
   const stuckBarField = document.querySelector('#teleop .field:nth-of-type(1)');
   const stuckBarRadios = document.querySelectorAll('#teleop input[name="stuckBar"]');
+  const stuckBarEnabled = Array.from(stuckBarRadios).some(rb => !rb.disabled);
   const stuckBarSelected = Array.from(stuckBarRadios).some(rb => rb.checked);
 
-  if (stuckBarSelected && stuckBarField) {
+  if (stuckBarEnabled && !stuckBarSelected) {
+    isValid = false;
+    if (stuckBarField) {
+      stuckBarField.style.borderRadius = '12px';
+      stuckBarField.style.border = '3px solid #ff4c4c';
+      stuckBarField.style.padding = '12px';
+      stuckBarField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (stuckBarField) {
     stuckBarField.style.border = '';
     stuckBarField.style.boxShadow = '';
     stuckBarField.style.padding = '';
     stuckBarField.style.borderRadius = '';
   }
 
-  const climbField = document.querySelector('#teleop .field:nth-of-type(4)');
   const climbRadios = document.querySelectorAll('#teleop input[name="climb-teleop"]');
   const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
+  const climbField = document.querySelector('#teleop .field:nth-of-type(4)');
 
-  if (climbSelected && climbField) {
+  if (!climbSelected) {
+    isValid = false;
+    if (climbField) {
+      climbField.style.borderRadius = '12px';
+      climbField.style.border = '3px solid #ff4c4c';
+      climbField.style.padding = '12px';
+      climbField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (climbField) {
     climbField.style.border = '';
     climbField.style.boxShadow = '';
     climbField.style.padding = '';
     climbField.style.borderRadius = '';
   }
 
-  const climbPosField = document.querySelector('#teleop .field:nth-of-type(5)');
-  const climbPosRadios = document.querySelectorAll('#teleop input[name="climbPos"]');
-  const climbPosSelected = Array.from(climbPosRadios).some(rb => rb.checked);
   const climbTeleopSelected = document.querySelector('#teleop input[name="climb-teleop"]:checked');
   const climbTeleopLabel = climbTeleopSelected?.nextElementSibling?.textContent?.trim() || '';
+  const climbPosField = document.querySelector('#teleop .field:nth-of-type(6)'); 
+  const climbPosRadios = document.querySelectorAll('#teleop input[name="climbPos"]');
+  const climbPosSelected = Array.from(climbPosRadios).some(rb => rb.checked);
 
-  if ((climbTeleopLabel === 'None' || climbPosSelected) && climbPosField) {
+  if (climbTeleopLabel !== 'None' && !climbPosSelected) {
+    isValid = false;
+    if (climbPosField) {
+      climbPosField.style.borderRadius = '12px';
+      climbPosField.style.border = '3px solid #ff4c4c';
+      climbPosField.style.padding = '12px';
+      climbPosField.style.boxShadow = '0 0 10px rgba(255, 76, 76, 0.3)';
+    }
+  } else if (climbPosField) {
     climbPosField.style.border = '';
     climbPosField.style.boxShadow = '';
     climbPosField.style.padding = '';
     climbPosField.style.borderRadius = '';
   }
+
+  if (!isValid) {
+    const invalidField = getFirstInvalidTeleopField();
+    if (invalidField) {
+      invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  stuckBarRadios.forEach(rb => rb.addEventListener('change', clearTeleopValidationHighlights));
+  climbRadios.forEach(rb => rb.addEventListener('change', clearTeleopValidationHighlights));
+  climbPosRadios.forEach(rb => rb.addEventListener('change', clearTeleopValidationHighlights));
+
+  return isValid;
 }
-document.querySelectorAll('#teleop .stuck-bar-option').forEach(opt => {
-  opt.addEventListener('click', clearTeleopValidationHighlights);
-});
 
-document.querySelectorAll('#teleop .climb-option').forEach(opt => {
-  opt.addEventListener('click', clearTeleopValidationHighlights);
-});
+function getFirstInvalidTeleopField() {
+  const stuckBarRadios = document.querySelectorAll('#teleop input[name="stuckBar"]');
+  const stuckBarEnabled = Array.from(stuckBarRadios).some(rb => !rb.disabled);
+  const stuckBarSelected = Array.from(stuckBarRadios).some(rb => rb.checked);
+  if (stuckBarEnabled && !stuckBarSelected) {
+    return document.querySelector('#teleop .field:nth-of-type(1)');
+  }
 
-document.querySelectorAll('#teleop .climb-pos').forEach(opt => {
-  opt.addEventListener('click', clearTeleopValidationHighlights);
+  const climbRadios = document.querySelectorAll('#teleop input[name="climb-teleop"]');
+  const climbSelected = Array.from(climbRadios).some(rb => rb.checked);
+  if (!climbSelected) {
+    return document.querySelector('#teleop .field:nth-of-type(4)');
+  }
+
+  const climbTeleopSelected = document.querySelector('#teleop input[name="climb-teleop"]:checked');
+  const climbTeleopLabel = climbTeleopSelected?.nextElementSibling?.textContent?.trim() || '';
+  const climbPosRadios2 = document.querySelectorAll('#teleop input[name="climbPos"]');
+  const climbPosSelected = Array.from(climbPosRadios2).some(rb => rb.checked);
+  if (climbTeleopLabel !== 'None' && !climbPosSelected) {
+    return document.querySelector('#teleop .field:nth-of-type(6)'); 
+  }
+
+  return null;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('#teleop .climb-pos').forEach(opt => {
+    opt.addEventListener('click', clearTeleopValidationHighlights);
+  });
+
+  document.querySelectorAll('#teleop input[name="climbPos"]').forEach(radio => {
+    radio.addEventListener('change', clearTeleopValidationHighlights);
+  });
+
+  document.querySelectorAll('#teleop input[name="climb-teleop"]').forEach(radio => {
+    radio.addEventListener('change', clearTeleopValidationHighlights);
+  });
+
+  document.querySelectorAll('#teleop input[name="stuckBar"]').forEach(radio => {
+    radio.addEventListener('change', clearTeleopValidationHighlights);
+  });
 });
 function validateTeleopForm() {
   let isValid = true;
@@ -3038,13 +3142,13 @@ function updateTopStatusBar() {
   const allianceValue = document.getElementById('statusAlliance');
   const teamValue = document.getElementById('statusTeam');
   const startPosValue = document.getElementById('statusStartPos');
-  
+
   let allianceColor = '';
-  
+
   if (allianceRadio) {
-    let allianceText = allianceRadio.id; 
+    let allianceText = allianceRadio.id;
     allianceValue.textContent = allianceText;
-    
+
     if (allianceRadio.id.startsWith('R')) {
       allianceColor = 'alliance-red';
       allianceValue.classList.remove('alliance-blue');
@@ -3059,14 +3163,14 @@ function updateTopStatusBar() {
     allianceValue.classList.remove('alliance-red', 'alliance-blue');
     allianceColor = '';
   }
-  
+
   const teamNumber = document.getElementById('teamNumber').value.trim();
   teamValue.textContent = teamNumber || '—';
   teamValue.classList.remove('alliance-red', 'alliance-blue');
   if (allianceColor) {
     teamValue.classList.add(allianceColor);
   }
-  
+
   const startPosRadio = document.querySelector('#setup input[name="startPos"]:checked');
   if (startPosRadio) {
     const startMap = {
@@ -3350,10 +3454,11 @@ window.goToSection = function (sectionId) {
   if (sectionId === 'teleop') {
     updateStuckBarState();
   }
+  if (sectionId === 'match-start') {
+    updateMatchStartButtonColor();
+  }
 };
-if (sectionId === 'match-start') {
-  updateMatchStartButtonColor();
-}
+
 
 document.addEventListener('keydown', function (e) {
   if (e.code === 'KeyS' && e.ctrlKey && document.getElementById('autonomous').classList.contains('active')) {
@@ -3361,3 +3466,358 @@ document.addEventListener('keydown', function (e) {
     stopTimerFlashing();
   }
 });
+
+// ========== SCOUTING SCHEDULE ==========
+let scoutingSchedule = [];
+let currentScouterInterval = null;
+
+function handleScoutingScheduleUpload(event) {
+  const file = event.target.files[0];
+  if (!file) {
+    console.log("No file selected");
+    return;
+  }
+
+  console.log("File selected:", file.name, file.type);
+
+  if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
+    updateScoutingScheduleStatus("Invalid file type. Please upload a CSV.", false);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const text = e.target.result;
+    console.log("CSV content loaded, length:", text.length);
+    console.log("First 200 chars:", text.substring(0, 200));
+    parseScoutingScheduleCSV(text);
+  };
+  reader.onerror = function (err) {
+    console.error("File read error:", err);
+    updateScoutingScheduleStatus("Error reading file.", false);
+  };
+  reader.readAsText(file);
+}
+
+function parseScoutingScheduleCSV(csvText) {
+  console.log("Parsing CSV...");
+
+  if (!csvText || csvText.trim().length === 0) {
+    updateScoutingScheduleStatus("CSV file is empty.", false);
+    return;
+  }
+
+  const lines = csvText.trim().split(/\r?\n/);
+  console.log("Lines found:", lines.length);
+
+  if (lines.length < 2) {
+    updateScoutingScheduleStatus("CSV file has no data rows (need header + at least 1 data row).", false);
+    return;
+  }
+
+  scoutingSchedule = [];
+
+  let delimiter = ',';
+  if (lines[0].includes('\t')) {
+    delimiter = '\t';
+    console.log("Using tab delimiter");
+  } else {
+    console.log("Using comma delimiter");
+  }
+
+  const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase());
+  console.log("Headers found:", headers);
+
+  const timeIndex = headers.findIndex(h => h === 'time' || h === 'shift' || h === 'period');
+  const red1Index = headers.findIndex(h => h === 'red 1' || h === 'red1');
+  const red2Index = headers.findIndex(h => h === 'red 2' || h === 'red2');
+  const red3Index = headers.findIndex(h => h === 'red 3' || h === 'red3');
+  const blue1Index = headers.findIndex(h => h === 'blue 1' || h === 'blue1');
+  const blue2Index = headers.findIndex(h => h === 'blue 2' || h === 'blue2');
+  const blue3Index = headers.findIndex(h => h === 'blue 3' || h === 'blue3');
+
+  console.log("Indices - time:", timeIndex, "red1:", red1Index, "blue1:", blue1Index);
+
+  if (timeIndex === -1) {
+    updateScoutingScheduleStatus("Missing 'Time' column in CSV. Found headers: " + headers.join(', '), false);
+    return;
+  }
+
+  let shiftsLoaded = 0;
+  let parseErrors = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    let columns;
+    if (delimiter === ',') {
+      columns = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+    } else {
+      columns = line.split('\t').map(c => c.trim());
+    }
+
+    if (columns.length <= timeIndex) {
+      console.log(`Row ${i} has insufficient columns: ${columns.length}`);
+      continue;
+    }
+
+    const timeRange = columns[timeIndex];
+    if (!timeRange) {
+      console.log(`Row ${i} has no time value`);
+      continue;
+    }
+
+    console.log(`Processing row ${i}: "${timeRange}"`);
+
+    let timeMatch = timeRange.match(/(\d{1,2}):(\d{2})\s*([ap]m?)\s*[-–]\s*(\d{1,2}):(\d{2})\s*([ap]m?)/i);
+
+    if (!timeMatch) {
+      timeMatch = timeRange.match(/(\d{1,2})\s*([ap]m?)\s*[-–]\s*(\d{1,2})\s*([ap]m?)/i);
+      if (timeMatch) {
+        timeMatch = [timeMatch[0], timeMatch[1], '00', timeMatch[2], timeMatch[3], '00', timeMatch[4]];
+      }
+    }
+
+    if (!timeMatch) {
+      parseErrors.push(`Row ${i}: Could not parse time format "${timeRange}"`);
+      console.log(`Failed to parse time: ${timeRange}`);
+      continue;
+    }
+
+    let startHour = parseInt(timeMatch[1]);
+    const startMinute = parseInt(timeMatch[2] || '0');
+    let startAmPm = timeMatch[3].toLowerCase().replace('m', ''); 
+
+    if (startAmPm === 'p' && startHour !== 12) startHour += 12;
+    if (startAmPm === 'a' && startHour === 12) startHour = 0;
+
+    console.log(`Parsed shift at ${startHour}:${startMinute.toString().padStart(2, '0')} from "${timeRange}"`);
+
+    const scouters = [];
+
+    function addScouterIfExists(index, position, alliance) {
+      if (index !== -1 && columns[index] && columns[index] !== '' && columns[index] !== '-') {
+        scouters.push({
+          name: columns[index],
+          position: position,
+          alliance: alliance
+        });
+        console.log(`  Added ${columns[index]} as ${position}`);
+      }
+    }
+
+    addScouterIfExists(red1Index, 'R1', 'red');
+    addScouterIfExists(red2Index, 'R2', 'red');
+    addScouterIfExists(red3Index, 'R3', 'red');
+    addScouterIfExists(blue1Index, 'B1', 'blue');
+    addScouterIfExists(blue2Index, 'B2', 'blue');
+    addScouterIfExists(blue3Index, 'B3', 'blue');
+    if (scouters.length > 0) {
+      scoutingSchedule.push({
+        startHour: startHour,
+        startMinute: startMinute,
+        scouters: scouters,
+        timeRange: timeRange,
+        rawTime: timeRange
+      });
+      shiftsLoaded++;
+      console.log(`✓ Added shift at ${startHour}:${startMinute} with ${scouters.length} scouters`);
+    } else {
+      console.log(`Row ${i} had no valid scouter names`);
+    }
+  }
+
+  scoutingSchedule.sort((a, b) => {
+    if (a.startHour !== b.startHour) return a.startHour - b.startHour;
+    return a.startMinute - b.startMinute;
+  });
+
+  console.log(`Total shifts loaded: ${shiftsLoaded}`);
+  console.log("Scouting schedule:", scoutingSchedule);
+
+  if (shiftsLoaded === 0) {
+    let errorMsg = "No valid shifts found in CSV. Expected format: '9:18a-10:18a' or '9:30am-10:30am'";
+    if (parseErrors.length > 0) {
+      errorMsg += "\nErrors: " + parseErrors.slice(0, 3).join('; ');
+    }
+    updateScoutingScheduleStatus(errorMsg, false);
+    return;
+  }
+
+  localStorage.setItem('scoutingScheduleCSV', csvText);
+  updateScoutingScheduleStatus(`✓ Loaded ${shiftsLoaded} shift${shiftsLoaded !== 1 ? 's' : ''} with scouters`, true);
+
+  startCurrentScouterDetection();
+}
+
+function updateScoutingScheduleStatus(message, success) {
+  const statusDiv = document.getElementById('scoutingScheduleUploadStatus');
+  if (!statusDiv) {
+    console.log("Status div not found");
+    return;
+  }
+
+  console.log("Update status:", message, success);
+
+  if (success) {
+    statusDiv.style.background = "#002244";
+    statusDiv.style.border = "2px solid #1e90ff";
+    statusDiv.style.color = "#1e90ff";
+    statusDiv.innerHTML = `<p style="text-align:center; font-size:1rem;">✓ ${message}</p>`;
+    statusDiv.classList.add('uploaded');
+  } else {
+    statusDiv.style.background = "#440000";
+    statusDiv.style.border = "2px solid #ff4c4c";
+    statusDiv.style.color = "#ff4c4c";
+    statusDiv.innerHTML = `<p style="text-align:center; font-size:1rem;">✗ ${message}</p>`;
+    statusDiv.classList.remove('uploaded');
+  }
+}
+
+function deleteScoutingSchedule() {
+  if (!localStorage.getItem('scoutingScheduleCSV')) {
+    alert("No scouting schedule uploaded.");
+    return;
+  }
+  if (confirm("Are you sure you want to delete the scouting schedule CSV?")) {
+    localStorage.removeItem('scoutingScheduleCSV');
+    scoutingSchedule = [];
+
+    const statusDiv = document.getElementById('scoutingScheduleUploadStatus');
+    if (statusDiv) {
+      statusDiv.style.background = "#1a1c1f";
+      statusDiv.style.border = "2px solid #2a2d31";
+      statusDiv.style.color = "#ffffff";
+      statusDiv.innerHTML = `<p style="text-align: center; font-size: 1rem; color: #ccc;">No scouting schedule uploaded.</p>`;
+      statusDiv.classList.remove('uploaded');
+    }
+
+    const bar = document.getElementById('currentScouterBar');
+    if (bar) bar.style.display = 'none';
+
+    if (currentScouterInterval) {
+      clearInterval(currentScouterInterval);
+      currentScouterInterval = null;
+    }
+
+    alert("Scouting schedule deleted successfully!");
+  }
+}
+
+function getNextScouter() {
+  if (!scoutingSchedule || scoutingSchedule.length === 0) {
+    console.log("No scouting schedule loaded");
+    return null;
+  }
+
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentMinutesSinceMidnight = currentHour * 60 + currentMinute;
+
+  console.log(`Checking time: ${currentHour}:${currentMinute.toString().padStart(2, '0')} (${currentMinutesSinceMidnight} min since midnight)`);
+
+  for (const shift of scoutingSchedule) {
+    const shiftStartMinutes = shift.startHour * 60 + shift.startMinute;
+
+    if (currentMinutesSinceMidnight >= shiftStartMinutes &&
+      currentMinutesSinceMidnight < shiftStartMinutes + 10) {
+
+      if (shift.scouters && shift.scouters.length > 0) {
+        const minutesAgo = currentMinutesSinceMidnight - shiftStartMinutes;
+        const minutesRemaining = 10 - minutesAgo;
+
+        console.log(`Active shift: ${shift.startHour}:${shift.startMinute} (${shift.timeRange}), ${minutesRemaining} min remaining`);
+        console.log("Scouters in shift:", shift.scouters.map(s => `${s.name} (${s.position})`).join(', '));
+
+        return {
+          scouters: shift.scouters,
+          shiftStartTime: shift.timeRange.split('-')[0].trim(),
+          minutesRemaining: minutesRemaining,
+          shiftInfo: shift
+        };
+      }
+    }
+  }
+
+  console.log("No active shift found");
+  return null;
+}
+
+function updateCurrentScouterDisplay() {
+  const bar = document.getElementById('currentScouterBar');
+  const nameEl = document.getElementById('currentScouterName');
+  const timeEl = document.getElementById('scoutingShiftTime');
+
+  if (!bar || !nameEl) {
+    console.log("Display elements not found");
+    return;
+  }
+
+  const allianceRadio = document.querySelector('#setup input[name="alliance"]:checked');
+  if (!allianceRadio) {
+    bar.style.display = 'none';
+    console.log("No alliance position selected");
+    return;
+  }
+
+  const currentPosition = allianceRadio.id; 
+  console.log("Current robot position:", currentPosition);
+
+  const nextScouterData = getNextScouter();
+
+  if (nextScouterData && nextScouterData.scouters && nextScouterData.scouters.length > 0) {
+    const matchingScouter = nextScouterData.scouters.find(s => s.position === currentPosition);
+
+    if (matchingScouter) {
+      bar.style.display = 'block';
+      nameEl.textContent = matchingScouter.name;
+
+      const minutesText = nextScouterData.minutesRemaining === 1 ? 'minute' : 'minutes';
+
+      if (currentPosition.startsWith('R')) {
+        bar.style.background = "linear-gradient(135deg, #ff4c4c, #cc0000)";
+      } else {
+        bar.style.background = "linear-gradient(135deg, #1e90ff, #0066cc)";
+      }
+
+      console.log(`Displaying scouter for ${currentPosition}: ${matchingScouter.name}`);
+    } else {
+      bar.style.display = 'none';
+      console.log(`No scouter found for position ${currentPosition} in current shift`);
+    }
+  } else {
+    bar.style.display = 'none';
+    console.log("No active scouter to display");
+  }
+}
+function startCurrentScouterDetection() {
+  if (currentScouterInterval) {
+    clearInterval(currentScouterInterval);
+  }
+
+  updateCurrentScouterDisplay();
+
+  currentScouterInterval = setInterval(updateCurrentScouterDisplay, 10000);
+  console.log("Started scouter detection interval");
+}
+
+function loadSavedScoutingSchedule() {
+  const savedCSV = localStorage.getItem('scoutingScheduleCSV');
+  console.log("Saved scouting schedule exists:", !!savedCSV);
+  if (savedCSV) {
+    parseScoutingScheduleCSV(savedCSV);
+    startCurrentScouterDetection();
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function () {
+    console.log("DOM loaded, loading scouting schedule...");
+    loadSavedScoutingSchedule();
+  });
+} else {
+  console.log("DOM already loaded, loading scouting schedule...");
+  loadSavedScoutingSchedule();
+}

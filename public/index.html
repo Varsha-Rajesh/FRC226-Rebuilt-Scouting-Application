@@ -15,7 +15,7 @@
     <section id="setup" class="section active">
       <img src="images/menu.png" alt="Menu" id="masterMenuBtn" class="setup-menu-icon" />
       <h1>Set Up</h1>
-      <h5 style="color: lightgray; text-align: center; width: 100%; margin: -20px 0 20px 0;">Tester V2</h5>
+      <h5 style="color: lightgray; text-align: center; width: 100%; margin: -20px 0 20px 0;">Tester V3</h5>
       <div class="field">
         <label for="matchNumber">Match Number</label>
         <input type="number" id="matchNumber" placeholder="Enter match #" />
@@ -229,13 +229,15 @@
           </div>
         </div>
       </div>
-
       <div class="field">
         <label>Climb</label>
         <div class="radio-select radio-select-column">
-          <div class="option climb-option"><input type="radio" name="climb-auto"><label>Level 1</label></div>
-          <div class="option climb-option"><input type="radio" name="climb-auto"><label>Failed</label></div>
-          <div class="option climb-option none-climb"><input type="radio" name="climb-auto"><label>None</label></div>
+          <div class="option climb-option"><input type="radio" name="climb-auto" value="level1"><label>Level 1</label>
+          </div>
+          <div class="option climb-option"><input type="radio" name="climb-auto" value="failed"><label>Failed</label>
+          </div>
+          <div class="option climb-option none-climb"><input type="radio" name="climb-auto"
+              value="none"><label>None</label></div>
         </div>
       </div>
 
@@ -302,11 +304,16 @@
       <div class="field">
         <label>Climb</label>
         <div class="radio-select-column">
-          <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Level 3</label></div>
-          <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Level 2</label></div>
-          <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Level 1</label></div>
-          <div class="option climb-option"><input type="radio" name="climb-teleop"><label>Failed</label></div>
-          <div class="option climb-option none-climb"><input type="radio" name="climb-teleop"><label>None</label></div>
+          <div class="option climb-option"><input type="radio" name="climb-teleop" value="level3"><label>Level 3</label>
+          </div>
+          <div class="option climb-option"><input type="radio" name="climb-teleop" value="level2"><label>Level 2</label>
+          </div>
+          <div class="option climb-option"><input type="radio" name="climb-teleop" value="level1"><label>Level 1</label>
+          </div>
+          <div class="option climb-option"><input type="radio" name="climb-teleop" value="failed"><label>Failed</label>
+          </div>
+          <div class="option climb-option none-climb"><input type="radio" name="climb-teleop"
+              value="none"><label>None</label></div>
         </div>
       </div>
 
@@ -320,9 +327,9 @@
       <div class="field">
         <label>Climb Position</label>
         <div class="radio-select-column">
-          <div class="option climb-pos"><input type="radio" name="climbPos"><label>Depot</label></div>
-          <div class="option climb-pos"><input type="radio" name="climbPos"><label>Center</label></div>
-          <div class="option climb-pos"><input type="radio" name="climbPos"><label>Outpost</label></div>
+          <div class="option climb-pos"><input type="radio" name="climbPos" value="depot"><label>Depot</label></div>
+          <div class="option climb-pos"><input type="radio" name="climbPos" value="center"><label>Center</label></div>
+          <div class="option climb-pos"><input type="radio" name="climbPos" value="outpost"><label>Outpost</label></div>
         </div>
       </div>
 
@@ -467,6 +474,13 @@
       <h1>Submit Scouting Data</h1>
       <div class="field">
         <label style="margin-bottom: 30px;">Your scouting data is ready to be submitted!</label>
+        <div id="currentScouterBar"
+          style="display: none; background: linear-gradient(135deg, #1e90ff, #0066cc); border-radius: 16px; padding: 12px 20px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+          <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9;">Next Scouter
+          </div>
+          <div id="currentScouterName" style="font-size: 1.8rem; font-weight: bold; margin-top: 5px;">—</div>
+          <div id="scoutingShiftTime" style="font-size: 0.8rem; opacity: 0.8; margin-top: 5px;"></div>
+        </div>
         <div id="qrContainerWrapper" style="text-align:center; margin:30px 0; position: relative; z-index: 10;">
           <div id="qrContainer"
             style="display:inline-block; background:#ffffff; padding:20px; border-radius:14px; position: relative; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
@@ -563,6 +577,26 @@
           </button>
           <input type="file" id="teamCSVUpload" accept=".csv" style="display:none"
             onchange="handleTeamCSVUpload(event)">
+        </div>
+        <div class="field" style="margin-top: 30px; margin-bottom: 20px">
+          <label>Upload Scouting Schedule (Shift Schedule)</label>
+        </div>
+
+        <div class="csv-upload-status" id="scoutingScheduleUploadStatus">
+          <p style="text-align: center; font-size: 1rem; color: #ccc;">
+            No scouting schedule uploaded.
+          </p>
+        </div>
+
+        <div class="csv-upload-container">
+          <button class="csv-upload-btn" onclick="document.getElementById('scoutingScheduleUpload').click()">
+            Upload CSV
+          </button>
+          <button class="csv-delete-btn" onclick="deleteScoutingSchedule()">
+            Delete CSV
+          </button>
+          <input type="file" id="scoutingScheduleUpload" accept=".csv" style="display:none"
+            onchange="handleScoutingScheduleUpload(event)">
         </div>
 
         <div class="field" style="margin-top: 30px; margin-bottom: 20px">

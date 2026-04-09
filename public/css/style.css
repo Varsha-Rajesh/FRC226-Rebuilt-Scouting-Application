@@ -1194,3 +1194,7 @@ body.timer-flashing-aggressive {
     font-size: 0.6rem;
   }
 }
+
+.csv-upload-container + .field {
+  margin-top: 20px;
+}
