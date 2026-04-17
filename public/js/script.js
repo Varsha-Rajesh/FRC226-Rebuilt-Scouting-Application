@@ -221,6 +221,62 @@ function setupAppPersistence() {
   window.addEventListener('beforeunload', saveAppState);
 }
 
+function setupScouterNameLimit() {
+  const MAX_SCOUTER_NAME_LENGTH = 6;
+  const scouterNameInput = document.getElementById('scouterName');
+  const feedbackEl = document.getElementById('scouterNameFeedback');
+  const counterEl = document.getElementById('scouterNameCounter');
+  if (!scouterNameInput || !feedbackEl || !counterEl) return;
+
+  scouterNameInput.maxLength = MAX_SCOUTER_NAME_LENGTH;
+
+  const updateCounter = () => {
+    const remaining = MAX_SCOUTER_NAME_LENGTH - scouterNameInput.value.length;
+    counterEl.textContent = `${remaining} characters remaining`;
+    counterEl.style.color = remaining === 0 ? '#ff4c4c' : '#aaa';
+  };
+
+  const showLimitMessage = () => {
+    feedbackEl.textContent = 'A 6 character limit has been imposed; remove last name or use a nickname.';
+  };
+
+  const clearLimitMessage = () => {
+    feedbackEl.textContent = '';
+  };
+
+  scouterNameInput.addEventListener('keydown', event => {
+    const isPrintableKey = event.key.length === 1;
+    const isModifier = event.ctrlKey || event.metaKey || event.altKey;
+    const isNavigationKey = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Tab'].includes(event.key);
+
+    if (isPrintableKey && !isModifier && !isNavigationKey && scouterNameInput.value.length >= MAX_SCOUTER_NAME_LENGTH) {
+      event.preventDefault();
+      showLimitMessage();
+      counterEl.style.color = '#ff4c4c';
+    }
+  });
+
+  scouterNameInput.addEventListener('input', () => {
+    updateCounter();
+    if (scouterNameInput.value.length < MAX_SCOUTER_NAME_LENGTH) {
+      clearLimitMessage();
+    }
+  });
+
+  scouterNameInput.addEventListener('paste', event => {
+    const pasteText = (event.clipboardData || window.clipboardData).getData('text') || '';
+    const allowed = MAX_SCOUTER_NAME_LENGTH - scouterNameInput.value.length;
+    if (pasteText.length > allowed) {
+      showLimitMessage();
+      counterEl.style.color = '#ff4c4c';
+    }
+  });
+
+  updateCounter();
+}
+
+setupScouterNameLimit();
+
 function adjustCounter(valueId, delta) {
   const valueEl = document.getElementById(valueId);
   if (!valueEl) return;
@@ -3432,10 +3488,12 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
-window.addEventListener('beforeunload', function () {
+window.addEventListener('beforeunload', function (event) {
   if ('vibrate' in navigator) {
     navigator.vibrate(0);
   }
+  event.preventDefault();
+  event.returnValue = '';
 });
 
 window.goToSection = function (sectionId) {

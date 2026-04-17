@@ -15,7 +15,7 @@
     <section id="setup" class="section active">
       <img src="images/menu.png" alt="Menu" id="masterMenuBtn" class="setup-menu-icon" />
       <h1>Set Up</h1>
-      <h5 style="color: lightgray; text-align: center; width: 100%; margin: -20px 0 20px 0;">MSC</h5>
+      <h5 style="color: lightgray; text-align: center; width: 100%; margin: -20px 0 20px 0;">MSC - Friday</h5>
       <div class="field">
         <label for="matchNumber">Match Number</label>
         <input type="number" id="matchNumber" placeholder="Enter match #" />
@@ -23,7 +23,11 @@
 
       <div class="field">
         <label for="scouterName">Scouter Name</label>
-        <input type="text" id="scouterName" placeholder="Enter your name" maxlength="50" />
+        <input type="text" id="scouterName" placeholder="Enter your name" maxlength="6" />
+        <div id="scouterNameFeedback" style="color: #d00; font-size: 0.85em; margin-top: 4px;"></div>
+        <div id="scouterNameCounter" style="text-align:right; font-size:0.85rem; color:#aaa; margin-top:4px;">
+          6 characters remaining
+        </div>
       </div>
 
       <div class="field">
@@ -172,6 +176,7 @@
 
       <div class="field">
         <label>Fuel Ferried</label>
+        <div class="field-subtext" style="margin-top: -15px; margin-bottom: 15px; font-size: 15px; color: #ccc">(Fuel Shot into Alliance Zone and Pushed Under Trench)</div>
         <div class="counter-modern">
           <div class="counter-value-large" id="autoFuelFerried">0</div>
           <div class="counter-buttons-grid">
@@ -283,6 +288,7 @@
 
       <div class="field">
         <label>Fuel Ferried</label>
+        <div class="field-subtext" style="margin-top: -15px; margin-bottom: 15px; font-size: 15px; color: #ccc">(Fuel Shot into Alliance Zone and Pushed Under Trench)</div>
         <div class="counter-modern">
           <div class="counter-value-large" id="teleFuelFerried">0</div>
           <div class="counter-buttons-grid">
