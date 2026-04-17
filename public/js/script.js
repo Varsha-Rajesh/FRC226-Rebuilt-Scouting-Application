@@ -1303,6 +1303,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
   restoreAppState();
+  restoreQRCodeFromStorage();
   setupAppPersistence();
 });
 
@@ -2728,8 +2729,18 @@ function saveDataToCSV() {
   }
 
   const qrFields = fields.slice(0, 21).map(cleanField).join("\t") + '\n';
+  localStorage.setItem('lastQRCodeData', qrFields);
   generateQRCode(qrFields);
 }
+function restoreQRCodeFromStorage() {
+  const lastQRCodeData = localStorage.getItem('lastQRCodeData');
+  if (!lastQRCodeData) return;
+  const qrContainer = document.getElementById('qrContainer');
+  if (qrContainer) {
+    generateQRCode(lastQRCodeData);
+  }
+}
+
 function generateQRCode(cleanData) {
   const qrContainer = document.getElementById("qrContainer");
   const qrDataText = document.getElementById("qrDataText");
@@ -3494,6 +3505,22 @@ window.addEventListener('beforeunload', function (event) {
   }
   event.preventDefault();
   event.returnValue = '';
+  return '';
+});
+
+window.onbeforeunload = function (event) {
+  if ('vibrate' in navigator) {
+    navigator.vibrate(0);
+  }
+  if (event) {
+    event.preventDefault();
+    event.returnValue = '';
+  }
+  return '';
+};
+
+window.addEventListener('pagehide', function () {
+  saveAppState();
 });
 
 window.goToSection = function (sectionId) {
